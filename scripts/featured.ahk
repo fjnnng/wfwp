@@ -355,11 +355,11 @@ If (totalsizeplus != "? b")
     totalsizeplus := formatsize(totalsizeplus)
 excludematch := StrReplace(exclude, "/")
 excludematch := "category!=" . excludematch
-If (update && (!skipgeneratingdat))
+If (update && !skipgeneratingdat)
     FileAppend, %generateat%: %totalsize% / %totalnumber% new pics + %totalsizeplus% / %totalnumberplus% old pics from %timestamp% database -> %qualifiedsize% / %qualifiednumber% pics`, formats=%formats% -> orientation=%screenorientation%`,resolution>=%minimalresolution%`,%excludematch%`;`r`n, stats.log
 Else
     FileAppend, %generateat%: %totalsize% / %totalnumber% pics (excl / excl %duplicatenumber% dups) -> %qualifiedsize% / %qualifiednumber% pics (incl / excl %duplicatenumberplus% dups)`, formats=%formats% -> orientation=%screenorientation%`,resolution>=%minimalresolution%`,%excludematch%`;`r`n, stats.log
-If (upload && (!skipgeneratingdat))
+If (upload && !skipgeneratingdat)
 {
     FileRemoveDir, upload, 1
     FileCreateDir, upload
