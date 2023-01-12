@@ -620,9 +620,9 @@ oct2hexhex(oct)
         Return, "hh"
     Return, byte2hex(SubStr(oct, 1, 4)) . byte2hex(SubStr(oct, 5))
 }
-ping(proxy := false)
+ping(proxy := false, try := 3)
 {
-    Loop, 3
+    Loop, %try%
     {
         FileDelete, 204.tmp
         If !udtlp("https://www.gstatic.com/generate_204", "204.tmp", proxy, true)
