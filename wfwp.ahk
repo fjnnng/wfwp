@@ -1211,18 +1211,18 @@ Else
         Menu, Tray, Icon, commons.ico
 }
 If !online
-    SetTimer, refreshstate, -30000, -2
+    SetTimer, refreshstate, -10000, -3
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 refreshstate:
-online := ping(server)
+online := ping(server, 1)
 If online
 {
     GoSub, refreshicon
     Menu, Tray, Tip, wfwp
 }
 Else
-    SetTimer, refreshstate, -30000, -2
+    SetTimer, refreshstate, -10000, -3
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 hotkeys(wparam, lparam)
