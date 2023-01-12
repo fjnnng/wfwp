@@ -399,7 +399,7 @@ dat2sha1(datfile, sha1file, append := false, orientation := "+", minimalresoluti
         probe := category & binaryexclude
         If (probe != 0)
         {
-            If ((!InStr(A_LoopReadLine, "orientation = -")) || (probe != 1 << 2))
+            If (!InStr(A_LoopReadLine, "orientation = -") || (probe != 1 << 2))
                 Continue
         }
         qualifiednumberdelta := qualifiednumberdelta + 1
@@ -482,9 +482,9 @@ folderpicturesize(folder, match1 := false, match2 := false)
             Continue
         If (RegExMatch(A_LoopFileName, "[0-9a-f]+\.[+-]\.") != 1)
             Continue
-        If (match1 && (!InStr(A_LoopFileName, match1)))
+        If (match1 && !InStr(A_LoopFileName, match1))
             Continue
-        If (match2 && (!InStr(A_LoopFileName, match2)))
+        If (match2 && !InStr(A_LoopFileName, match2))
             Continue
         FileGetSize, size, %folder%\%A_LoopFileName%
         folderpicturesize := folderpicturesize + size
@@ -522,11 +522,11 @@ formatsize(size)
 }
 formattriple(first, second, third)
 {
-    If (first && (!second) && (!third))
+    If (first && !second && !third)
         Return, 1
-    If ((!first) && second && (!third))
+    If (!first && second && !third)
         Return, 2
-    If ((!first) && (!second) && third)
+    If (!first && !second && third)
         Return, 3
     Return, 0
 }
