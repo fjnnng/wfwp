@@ -105,7 +105,7 @@ Loop, Read, %inputfile%
     }
     Else
     {
-        If ((!InStr(url, "/thumb/")) && (!InStr(renameto, sha(renameto, true))))
+        If (!InStr(url, "/thumb/") && !InStr(renameto, sha(renameto, true)))
         {
             FileDelete, %renameto%
             Goto, redownload
