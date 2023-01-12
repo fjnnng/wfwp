@@ -87,7 +87,7 @@ Else
 If firstrun
     FileDelete, config
 nextswitch := 0
-If ((!firstrun) && (configarray.Length() = 2))
+If (!firstrun && (configarray.Length() = 2))
 {
     nextswitchcache := configarray[2]
     If nextswitchcache Is time
@@ -195,11 +195,11 @@ Global lifetime := 10
 Global oddclick := false
 GoSub, refreshicon
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-If ((!firstrun) && qualifieddatanumber)
+If (!firstrun && qualifieddatanumber)
 {
     If !nextswitch
         moveonlist := 0
-    If ((!nextswitch) || moveonlist)
+    If (!nextswitch || moveonlist)
         GoSub, switchmenu
     Else
     {
@@ -474,7 +474,7 @@ Loop, %totalnumberrestriction%
             Continue
         RegExMatch(A_LoopReadLine, "[^ ]+", filename)
         filepath := "cache\" . filename
-        If (InStr(filename, match1) && InStr(filename, match2) && (!FileExist(filepath)))
+        If (InStr(filename, match1) && InStr(filename, match2) && !FileExist(filepath))
             oneline := A_LoopReadLine, linenumbers[whichmonitortypeindex] := A_Index
         Else
             Continue
@@ -562,7 +562,7 @@ If (monitorcount > 1)
 }
 Else
     originalsha1 := trackwallpaper(monitors, 1, "cache")
-If ((!originalsha1) || (RegExMatch(originalsha1, "tmp-[0-9]+\.jpg") = 1))
+If (!originalsha1 || (RegExMatch(originalsha1, "tmp-[0-9]+\.jpg") = 1))
     Return
 RegExMatch(originalsha1, "[0-9a-f]+", originalsha1)
 originalline := 0
@@ -651,7 +651,7 @@ If (monitorcount > 1)
 }
 Else
     banfilename := trackwallpaper(monitors, 1, "cache"), resolutiontag := monitortypes[1], moveonlist := 1
-If ((!banfilename) || RegExMatch(banfilename, "tmp-[0-9]+\.jpg", , 1))
+If (!banfilename || RegExMatch(banfilename, "tmp-[0-9]+\.jpg", , 1))
 {
     moveonlist := 0
     Return
@@ -1067,7 +1067,7 @@ If !datfilelength
     Goto, databasecheck
 }
 firstrun := false
-If ((!qualifieddatanumber) || (binaryexclude != binaryexcludecache))
+If (!qualifieddatanumber || (binaryexclude != binaryexcludecache))
 {
     qualifieddatanumber := superdat2sha1("resolved.dat", "urls.sha1", monitortypes, binaryexclude)
     If !qualifieddatanumber
@@ -1084,7 +1084,7 @@ If ((!qualifieddatanumber) || (binaryexclude != binaryexcludecache))
 }
 If !nextswitch
     moveonlist := 0
-If ((!nextswitch) || moveonlist)
+If (!nextswitch || moveonlist)
     GoSub, switchmenu
 Else
 {
@@ -1229,11 +1229,11 @@ hotkeys(wparam, lparam)
 {
     If (lparam != 0x202)
         Return
-    If (GetKeyState("Ctrl") && (!GetKeyState("Alt")) && (!GetKeyState("Shift")))
+    If (GetKeyState("Ctrl") && !GetKeyState("Alt") && !GetKeyState("Shift"))
         GoSub, originalmenu
-    Else If ((!GetKeyState("Ctrl")) && GetKeyState("Alt") && (!GetKeyState("Shift")))
+    Else If (!GetKeyState("Ctrl") && GetKeyState("Alt") && !GetKeyState("Shift"))
         GoSub, blacklistmenu
-    Else If ((!GetKeyState("Ctrl")) && (!GetKeyState("Alt")) && GetKeyState("Shift"))
+    Else If (!GetKeyState("Ctrl") && !GetKeyState("Alt") && GetKeyState("Shift"))
     {
         Global monitorcount
         If (monitorcount > 1)
