@@ -245,7 +245,18 @@ byte2hex(byte)
 }
 category(list)
 {
-    arthropod := 0, bird := 0, people := 0, amphibian := 0, fish := 0, reptile := 0, oanimals := 0, bone := 0, shell := 0, plant := 0, fungi := 0, olifeforms := 0
+    arthropod := 0
+    bird := 0
+    people := 0
+    amphibian := 0
+    fish := 0
+    reptile := 0
+    oanimals := 0
+    bone := 0
+    shell := 0
+    plant := 0
+    fungi := 0
+    olifeforms := 0
     If InStr(list, "/arthropod")
         arthropod := 1
     If InStr(list, "/bird")
@@ -300,7 +311,9 @@ countandsortblacklist(blacklist)
 {
     If !FileExist(blacklist)
         Return, 0
-    blacklistcopy := blacklist . "copy", length := 0
+    blacklistcopy := blacklist . "copy"
+    length := 0
+    sha1s := "0x"
     Loop, Read, %blacklist%, %blacklistcopy%
     {
         If !A_LoopReadLine
@@ -308,9 +321,12 @@ countandsortblacklist(blacklist)
         RegExMatch(A_LoopReadLine, "[^.]+\.[1-3]", sha1dotresolution)
         If (sha1dotresolution != A_LoopReadLine)
             Continue
-        RegExMatch(sha1, "[^.]+", sha1dotresolution)
+        RegExMatch(sha1dotresolution, "[^.]+", sha1)
         If sha1 Is Not xdigit
             Continue
+        If sha1 In %sha1s%
+            Continue
+        sha1s := sha1s . "," . sha1
         FileAppend, %A_LoopReadLine%`r`n
         length := length + 1
     }
@@ -584,15 +600,31 @@ jsonmatch(haystack, key, regex)
 }
 loadconfiguration(configuration, ByRef proxy, ByRef ip1, ByRef ip2, ByRef ip3, ByRef ip4, ByRef port, ByRef frequency, ByRef minute, ByRef nminute, ByRef binaryexclude)
 {
-    binaryexclude := "0x" . SubStr(configuration, 1, 4), osettings := "0x" . SubStr(configuration, 5)
-    proxy := extractbit(osettings, 0), ip1 := extractbits(osettings, 1, 8), ip2 := extractbits(osettings, 9, 8), ip3 := extractbits(osettings, 17, 8), ip4 := extractbits(osettings, 25, 8), port := extractbits(osettings, 33, 16)
-    frequency := extractbits(osettings, 49, 6), minute := extractbit(osettings, 55), nminute := !minute
+    binaryexclude := "0x" . SubStr(configuration, 1, 4)
+    osettings := "0x" . SubStr(configuration, 5)
+    proxy := extractbit(osettings, 0)
+    ip1 := extractbits(osettings, 1, 8)
+    ip2 := extractbits(osettings, 9, 8)
+    ip3 := extractbits(osettings, 17, 8)
+    ip4 := extractbits(osettings, 25, 8)
+    port := extractbits(osettings, 33, 16)
+    frequency := extractbits(osettings, 49, 6)
+    minute := extractbit(osettings, 55)
+    nminute := !minute
 }
 loaddefault(ByRef proxy, ByRef ip1, ByRef ip2, ByRef ip3, ByRef ip4, ByRef port, ByRef frequency, ByRef minute, ByRef nminute, ByRef binaryexclude)
 {
-    proxy := 0, ip1 := 255, ip2 := 255, ip3 := 255, ip4 := 255, port := 65535
-    frequency := 30, minute := 1, nminute := !minute
-    inputexclude := "/arthropod,/bird,/amphibian,/reptile,/animalso,/fungi,lifeforms", binaryexclude := "0x" . category(inputexclude)
+    proxy := 0
+    ip1 := 255
+    ip2 := 255
+    ip3 := 255
+    ip4 := 255
+    port := 65535
+    frequency := 30
+    minute := 1
+    nminute := !minute
+    inputexclude := "/arthropod,/bird,/amphibian,/reptile,/animalso,/fungi,lifeforms"
+    binaryexclude := "0x" . category(inputexclude)
 }
 matches(monitortype, ByRef match1 := "", ByRef match2 := "")
 {
@@ -868,7 +900,13 @@ udtlp(uri, outfile, proxy := false, mute := false, timeout := false)
 }
 unicodeplus(string, wiki := false)
 {
-    string := StrReplace(string, "%", "%25"), string := StrReplace(string, " ", "%20"), string := StrReplace(string, "&", "%26"), string := StrReplace(string, "+", "%2b"), string := StrReplace(string, "'", "%27"), string := StrReplace(string, """", "%22"), string := StrReplace(string, "``", "%60")
+    string := StrReplace(string, "%", "%25")
+    string := StrReplace(string, " ", "%20")
+    string := StrReplace(string, "&", "%26")
+    string := StrReplace(string, "+", "%2b")
+    string := StrReplace(string, "'", "%27")
+    string := StrReplace(string, """", "%22")
+    string := StrReplace(string, "``", "%60")
     Loop
     {
         If !RegExMatch(string, "\\u[0-9a-f][0-9a-f][0-9a-f][0-9a-f]", transfrom)
@@ -884,7 +922,8 @@ unicodeplus(string, wiki := false)
                 hex := SubStr(wikicode, 1, 1), wikicode := SubStr(wikicode, 2) . hex2byte(hex)
             If (length = 3)
             {
-                part1 := "10" . SubStr(wikicode, 7), part2 := SubStr(wikicode, 1, 6)
+                part1 := "10" . SubStr(wikicode, 7)
+                part2 := SubStr(wikicode, 1, 6)
                 lead2 := SubStr(part2, 1, 1)
                 If (lead2 = "0")
                     part2 := "11" . part2, wikicode := "%" . oct2hexhex(part2) . "%" . oct2hexhex(part1)
