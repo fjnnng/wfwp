@@ -882,7 +882,7 @@ If ErrorLevel
     Goto, quit
 }
 FileRead, github, update\github.json
-github := jsonmatch(github, "tag_name", ".*?[0-9v.]+")
+github := jsonmatch(github, "tag_name", ".*?[0-9a-fv.-]+")
 If (version = github)
 {
     TrayTip, , No need to update., , 16
