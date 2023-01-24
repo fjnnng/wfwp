@@ -14,7 +14,9 @@ Other notable features include: supporting multiple monitors, blacklisting speci
 
 ### 2.2 Settings
 
-![general](/screenshots/4.png)![exclude](/screenshots/5.png)
+![general](/screenshots/4.png)
+
+![exclude](/screenshots/5.png)
 
 ### 2.3 Multiple Monitors
 
