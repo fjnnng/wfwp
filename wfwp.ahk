@@ -596,7 +596,13 @@ If (originalsizeinmb > 128)
 {
     MsgBox, 4, Download or Not, This original file sizes %originalsizeinmb% MB. Are you sure you want to download it?
     IfMsgBox Yes
-        Goto, confirmed
+    {
+        MsgBox, 4, Manually or Not, wfwp is not intended as a downloader for large images. If you want to download it manually, click Yes. Click No if you want wfwp to download it anyway.
+        IfMsgBox Yes
+            Run, %originalurl%
+        Else IfMsgBox No
+            Goto, confirmed
+    }
     Return
 }
 confirmed:
