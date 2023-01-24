@@ -6,8 +6,6 @@ Other notable features include: supporting multiple monitors, blacklisting speci
 
 # 2. Screenshots
 
-(The following pictures are somehow outdated and will be updated after `wfwp` is transferred to `AHK v2`.)
-
 ![desktop](/screenshots/1.png)
 
 ### 2.1 Menu
