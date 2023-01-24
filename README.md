@@ -39,7 +39,7 @@ Here is a real example:
 
 - `wfwp` treats monitors with resolutions larger than UHD as UHD for now, to ensure performance. If you have such monitors, sorry :(
 
-- `wfwp` is only tested on my Windows 11, but it should work fine on Windows 10. The only potential limitations come from several PowerShell commands in support of proxy and checksum, while PowerShell 5.1 is pre-installed on all Windows 10, where the related commands are already supported.
+- `wfwp` is only tested on my Windows 11 and 10 and should work fine on both plateforms. The only potential limitations come from several PowerShell commands in support of proxy and checksum, while PowerShell 5.1 is pre-installed on all Windows 10, where the related commands are already supported.
 
 # 4. Usage
 
