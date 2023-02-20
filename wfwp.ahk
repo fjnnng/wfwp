@@ -213,6 +213,8 @@ If (!firstrun && qualifieddatanumber)
 Else
     GoSub, settingsmenu
 Menu, Tray, Tip, wfwp
+If !online
+    Menu, Tray, Tip, offline
 Critical, Off
 OnMessage(0x404, "hotkeys")
 Return
