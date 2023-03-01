@@ -61,7 +61,10 @@ Loop, %monitorcount%
 monitorcount := monitors.Length()
 If !monitorcount
 {
-    MsgBox, , wfwp, Failed to detect any monitor. wfwp will exit.
+    MsgBox, 5, wfwp, Failed to detect any monitor.
+    IfMsgBox, Retry
+        Reload
+    MsgBox, , wfwp, wfwp will exit.
     ExitApp
 }
 If overuhd
