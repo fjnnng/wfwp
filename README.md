@@ -66,9 +66,10 @@ If you have [AutoHotkey](https://www.autohotkey.com/) (v1.1 for now) installed, 
 Except for the wallpapers, which come from Wikimedia Commons, the icons used in `wfwp` are also from Wikimedia Commons:
 
 ```
-commons.ico: https://commons.wikimedia.org/static/favicon/commons.ico
-commons.png: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/720px-Commons-logo.svg.png
-offline.ico: https://commons.wikimedia.org/static/favicon/wmf.ico
+wfwp.ico:        https://commons.wikimedia.org/static/favicon/commons.ico
+online.png:      https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/48px-Wikimedia-logo.svg.png
+offline.png:     https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Wikimedia-logo_black.svg/48px-Wikimedia-logo_black.svg.png
+placeholder.png: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/720px-Commons-logo.svg.png
 ```
 
 If there are any legal issues requiring further addressing, please let me know. Thank you.
