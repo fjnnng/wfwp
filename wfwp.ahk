@@ -24,8 +24,9 @@ Else
     MsgBox, , wfwp, My name should be wfwp. I will exit.
     ExitApp
 }
-FileInstall, placeholder.png, placeholder.png, 1
+FileInstall, online.png, online.png, 1
 FileInstall, offline.png, offline.png, 1
+FileInstall, placeholder.png, placeholder.png, 1
 Loop, Files, cache\*.jpg.ex*
 {
     nullstring := RegExReplace(A_LoopFileName, "[0-9a-f]+\.[+-]\..*\..*\.jpg\.ex[0-9]+")
