@@ -16,15 +16,15 @@ Else If (A_ScriptName = "wfwp.exe")
 }
 Else If (A_ScriptName = "wfwp.ahk")
 {
-    If FileExist("commons.ico")
-        Menu, Tray, Icon, commons.ico
+    If FileExist("online.png")
+        Menu, Tray, Icon, online.png
 }
 Else
 {
     MsgBox, , wfwp, My name should be wfwp. I will exit.
     ExitApp
 }
-FileInstall, commons.png, commons.png, 1
+FileInstall, placeholder.png, placeholder.png, 1
 FileInstall, offline.png, offline.png, 1
 Loop, Files, cache\*.jpg.ex*
 {
@@ -312,7 +312,7 @@ Loop, %monitorcount%
     }
     Else
     {
-        Gui, Add, Picture, %xory%%plusm% %worh%%maxshortsdie% vpdot%A_Index% gtellwhichone, commons.png
+        Gui, Add, Picture, %xory%%plusm% %worh%%maxshortsdie% vpdot%A_Index% gtellwhichone, placeholder.png
         totallengthalonglongside := totallengthalonglongside + commonratio * maxshortsdie
     }
     plusm := "+m"
@@ -1212,14 +1212,13 @@ If (!online && FileExist("offline.png"))
 ; }
 Else
 {
+    If FileExist("online.png")
+        Menu, Tray, Icon, online.png
     If (A_ScriptName = "wfwp.exe")
     {
-        Menu, Tray, Icon, *
         FileDelete, cache\1f383.png
         FileDelete, cache\1f384.png
     }
-    Else If FileExist("commons.ico")
-        Menu, Tray, Icon, commons.ico
 }
 If !online
     SetTimer, refreshstate, -10000, -3
