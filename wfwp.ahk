@@ -698,12 +698,10 @@ Loop, Read, blacklist, blacklistcopy
 {
     If !A_LoopReadLine
         Continue
-    RegExMatch(A_LoopReadLine, "[^.]+\.[0-9]{10}", thisline)
+    RegExMatch(A_LoopReadLine, "[0-9a-f]+\.[0-9]+", thisline)
     If (thisline != A_LoopReadLine)
         Continue
     RegExMatch(thisline, "[^.]+", thisline)
-    If thisline Is Not xdigit
-        Continue
     If lastline
     {
         FileAppend, %lastline%`r`n
