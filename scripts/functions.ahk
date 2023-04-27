@@ -307,12 +307,10 @@ countandsortblacklist(blacklist)
     {
         If !A_LoopReadLine
             Continue
-        RegExMatch(A_LoopReadLine, "[^.]+\.[0-9]{10}", sha1dotresolution)
+        RegExMatch(A_LoopReadLine, "[0-9a-f]+\.[0-9]+", sha1dotresolution)
         If (sha1dotresolution != A_LoopReadLine)
             Continue
         RegExMatch(sha1dotresolution, "[^.]+", sha1)
-        If sha1 Is Not xdigit
-            Continue
         If sha1 In %sha1s%
             Continue
         sha1s := sha1s . "," . sha1
