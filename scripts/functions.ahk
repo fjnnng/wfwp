@@ -23,21 +23,12 @@ detectmonitor(indexfromzero)
         Return, 0
     If ((width <= 0) || (height <= 0))
         Return, 0
-    If (width > height)
-        landscape := "+"
-    Else
-        landscape := "-"
-    longside := Max(width, height)
-    shortside := Min(width, height)
-    If (longside > 3840 && shortside > 2160)
-        resolution := 4
-    Else If (longside > 2560 && shortside > 1440)
-        resolution := 3
-    Else If (longside > 1920 && shortside > 1080)
-        resolution := 2
-    Else
-        resolution := 1
-    Return, landscape . resolution . path
+    If ((width >= 6400) || (height >= 6400))
+    {
+        width := width * 99999 / Max(width, height)
+        height := height * 99999 / Max(width, height)
+    }
+    Return, Format("{:05u}", width) . Format("{:05u}", height) . path 
 }
 detectmonitorpath(indexfromzero)
 {
@@ -65,7 +56,7 @@ switchwallpaper(filepathfull, monitors, monitorindex, flashex := false, filter :
 {
     If flashex
         flashex := trackwallpaper(monitors, monitorindex, filter)
-    monitorpath := SubStr(monitors[monitorindex], 3)
+    monitorpath := SubStr(monitors[monitorindex], 11)
     idesktopwallpaper := ComObjCreate("{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}", "{B92B56A9-8B55-4E14-9A89-0199BBB6F93B}")
     offset := 3 * A_PtrSize
     DllCall(NumGet(NumGet(idesktopwallpaper+0), offset), "Ptr", idesktopwallpaper, "Ptr", &monitorpath, "WStr", filepathfull)
@@ -83,7 +74,7 @@ switchwallpaper(filepathfull, monitors, monitorindex, flashex := false, filter :
 }
 trackwallpaper(monitors, monitorindex, filter := false)
 {
-    monitorpath := SubStr(monitors[monitorindex], 3)
+    monitorpath := SubStr(monitors[monitorindex], 11)
     idesktopwallpaper := ComObjCreate("{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}", "{B92B56A9-8B55-4E14-9A89-0199BBB6F93B}")
     offset := 4 * A_PtrSize
     DllCall(NumGet(NumGet(idesktopwallpaper+0), offset), "Ptr", idesktopwallpaper, "Ptr", &monitorpath, "Ptr*", pointer)
@@ -96,7 +87,7 @@ trackwallpaper(monitors, monitorindex, filter := false)
         If InStr(filepathfull, filter)
         {
             filename := StrReplace(filepathfull, filter)
-            If ((RegExMatch(filename, "tmp-[0-9]+\.jpg") != 1) && (RegExMatch(filename, "[0-9a-f]+\.[+-]\..*\.jpg") != 1))
+            If ((RegExMatch(filename, "tmp-[0-9]+\.jpg") != 1) && (RegExMatch(filename, "[0-9a-f]{8,}\..*\.jpg") != 1))
                 Return, 0
             Return, filename
         }
@@ -151,17 +142,15 @@ randomdisplayothers(folder, monitors, moveonlist, flashex := false)
         }
         current := trackwallpaper(monitors, A_Index, folder)
         monitor := monitors[A_Index]
-        matches(monitor, match1, match2)
+        matcher := "." . SubStr(monitor, 1, 10) . "."
         randomlist := ""
         Loop, Files, %folder%\*.*
         {
             If (A_LoopFileExt != "jpg")
                 Continue
-            If (RegExMatch(A_LoopFileName, "[0-9a-f]+\.[+-]\.") != 1)
+            If (RegExMatch(A_LoopFileName, "[0-9a-f]{8,}\.") != 1)
                 Continue
-            If !InStr(A_LoopFileName, match1)
-                Continue
-            If !InStr(A_LoopFileName, match2)
+            If !InStr(A_LoopFileName, matcher)
                 Continue
             If (A_LoopFileName != current)
                 randomlist := randomlist . "," . A_LoopFileName
@@ -318,7 +307,7 @@ countandsortblacklist(blacklist)
     {
         If !A_LoopReadLine
             Continue
-        RegExMatch(A_LoopReadLine, "[^.]+\.[1-3]", sha1dotresolution)
+        RegExMatch(A_LoopReadLine, "[^.]+\.[0-9]{10}", sha1dotresolution)
         If (sha1dotresolution != A_LoopReadLine)
             Continue
         RegExMatch(sha1dotresolution, "[^.]+", sha1)
@@ -363,45 +352,63 @@ countdown(seconds)
         hours := "0" . hours
     Return, hours . ":" . minutes . ":" . seconds
 }
-dat2sha1(datfile, sha1file, append := false, orientation := "+", minimalresolution := 2, binaryexclude := "0x0000", removeduplicate := true, ByRef qualifiednumberdelta := 0, ByRef qualifiedsizedelta := 0, resize := true, safetylock := true)
+countpixel(monitortype)
 {
-    If (orientation = "-")
-        orientationmatch := "orientation = -"
-    Else
-        orientationmatch := "orientation = +"
-    If (minimalresolution = 3)
-        resolutionmatch := "resolution = 3", targetwidth := 3840, targetheight := 2160, resizedto := "uhd"
-    Else If (minimalresolution = 1)
-        resolutionmatch := "resolution = 1,resolution = 2,resolution = 3", targetwidth := 1920, targetheight := 1080, resizedto := "fhd"
-    Else
-        resolutionmatch := "resolution = 2,resolution = 3", targetwidth := 2560, targetheight := 1440, resizedto := "qhd"
-    If safetylock
-        resize := true
-    Else
-    {
-        If !orientation
-            orientationmatch := "orientation ="
-        If !minimalresolution
-            resolutionmatch := "resolution =", resize := false
-    }
+    If (StrLen(monitortype) != 10)
+        Return, 0
+    Return, SubStr(monitortype, 1, 5) * SubStr(monitortype, 6, 5) / (2560 * 1440)
+}
+dat2sha1(datfile, sha1file, append := false, monitortype := "0256001440", binaryexclude := "0x0000", removeduplicate := true, ByRef qualifiednumberdelta := 0, ByRef qualifiedsizedelta := 0, resize := true, safetylock := true)
+{
     If !append
         FileDelete, %sha1file%
+    If safetylock
+    {
+        resize := true
+        If (StrLen(monitortype) != 10)
+            monitortype := "0256001440"
+    }
+    Else
+    {
+        If ((StrLen(monitortype) != 10) || !monitortype)
+            monitortype := "0000000000", resize := false
+    }
+    monitorwidth := SubStr(monitortype, 1, 5)
+    monitorheight := SubStr(monitortype, 6, 5)
+    If monitorheight
+        monitorratio := monitorwidth / monitorheight
+    Else
+        monitorratio := 0
+    If !monitorratio
+    {
+        If safetylock
+            monitorratio := 16 / 9
+        Else
+            resize := false
+    }
+    monitorratiomin := 3 / 4 * monitorratio
+    monitorratiomax := 4 / 3 * monitorratio
     Loop, Read, %datfile%, %sha1file%
     {
         If !InStr(A_LoopReadLine, "sha1 =")
             Continue
-        If A_LoopReadLine Not Contains %orientationmatch%
-            Continue
-        If A_LoopReadLine Not Contains %resolutionmatch%
-            Continue
+        RegExMatch(A_LoopReadLine, "width = +[0-9]+", width)
+        RegExMatch(A_LoopReadLine, "height = +[0-9]+", height)
         RegExMatch(A_LoopReadLine, "category = 0x[0-9a-f]+", category)
         category := StrReplace(category, "category = ")
+        width := RegExReplace(width, "width = +")
+        height := RegExReplace(height, "height = +")
+        If ((width < monitorwidth) || (height < monitorheight))
+            Continue
         probe := category & binaryexclude
-        If (probe != 0)
+        If probe
         {
-            If (!InStr(A_LoopReadLine, "orientation = -") || (probe != 1 << 2))
+            If ((width < height) || (probe != 1 << 2))
                 Continue
         }
+        ratio := width / height
+        If ((ratio < monitorratiomin) || (monitorratiomax && (ratio > monitorratiomax)))
+            Continue
         qualifiednumberdelta := qualifiednumberdelta + 1
         RegExMatch(A_LoopReadLine, "url = "".*?""", url)
         url := Trim(StrReplace(url, "url = "), """")
@@ -411,27 +418,22 @@ dat2sha1(datfile, sha1file, append := false, orientation := "+", minimalresoluti
         size := RegExReplace(size, "size = +")
         qualifiedsizedelta := qualifiedsizedelta + size
         RegExMatch(url, "https.*\.", urlbody)
-        urlhead := StrReplace(url, urlbody)
-        headfororiginal := orientation . "." . urlhead
-        headforresized := headfororiginal . "." . resizedto . ".jpg"
-        If (StrLen(urlhead) = 3)
+        headfororiginal := StrReplace(url, urlbody)
+        headforresized := headfororiginal . "." . monitortype . ".jpg"
+        If (StrLen(headfororiginal) = 3)
             headfororiginal := headfororiginal . " ", headforresized := headforresized . " "
         If resize
         {
             outputsha1 := sha1 . "." . headforresized
-            RegExMatch(A_LoopReadLine, "width = +[0-9]+", width)
-            RegExMatch(A_LoopReadLine, "height = +[0-9]+", height)
-            width := RegExReplace(width, "width = +")
-            height := RegExReplace(height, "height = +")
-            ratio := width / height
+            reference := ratio - monitorratio
             If (ratio > 1)
-                reference := ratio - 16 / 9, realtargetwidth := targetwidth, realtargetheight := targetheight
+                targetwidth := monitorwidth, targetheight := monitorheight
             Else
-                reference := ratio - 9 / 16, realtargetwidth := targetheight, realtargetheight := targetwidth
+                targetwidth := monitorheight, targetheight := monitorwidth
             If (reference > 0)
-                resizeto := Round(realtargetheight * width / height)
+                resizeto := Round(targetheight * width / height)
             Else
-                resizeto := realtargetwidth
+                resizeto := targetwidth
             tie := "/" . resizeto . "px-"
             RegExMatch(url, "https.*/", parta)
             partb := StrReplace(url, parta)
@@ -473,18 +475,16 @@ extractbits(input, startingpower, length)
         power := startingpower + times, sum := sum + (extractbit(input, power) << times), times := times + 1
     Return, sum
 }
-folderpicturesize(folder, match1 := false, match2 := false)
+folderpicturesize(folder, matcher := false)
 {
     folderpicturesize := 0
     Loop, Files, %folder%\*.*
     {
         If (A_LoopFileExt != "jpg")
             Continue
-        If (RegExMatch(A_LoopFileName, "[0-9a-f]+\.[+-]\.") != 1)
+        If (RegExMatch(A_LoopFileName, "[0-9a-f]{8,}\.") != 1)
             Continue
-        If (match1 && !InStr(A_LoopFileName, match1))
-            Continue
-        If (match2 && !InStr(A_LoopFileName, match2))
+        If (matcher && !InStr(A_LoopFileName, matcher))
             Continue
         FileGetSize, size, %folder%\%A_LoopFileName%
         folderpicturesize := folderpicturesize + size
@@ -626,25 +626,15 @@ loaddefault(ByRef proxy, ByRef ip1, ByRef ip2, ByRef ip3, ByRef ip4, ByRef port,
     inputexclude := "/arthropod,/bird,/amphibian,/reptile,/animalso,/fungi,lifeforms"
     binaryexclude := "0x" . category(inputexclude)
 }
-matches(monitortype, ByRef match1 := "", ByRef match2 := "")
+matches(monitortype, monitortypes)
 {
-    orientation := SubStr(monitortype, 1, 1)
-    If orientation Not In -,+
-        Return, 0
-    match1 := "." . orientation . "."
-    resolution := SubStr(monitortype, 2, 1)
-    If (resolution = 1)
-        match2 := ".fhd."
-    Else If (resolution = 2)
-        match2 := ".qhd."
-    Else If (resolution = 3)
-        match2 := ".uhd."
-    Else
-        Return, 0
-    typeindex := 2 * resolution
-    If (orientation = "-")
-        typeindex := typeindex - 1
-    Return, typeindex
+    monitortypecount := monitortypes.Length()
+    Loop, %monitortypecount%
+    {
+        If (monitortype = monitortypes[A_Index])
+            Return, A_Index
+    }
+    Return, 0
 }
 oct2hexhex(oct)
 {
@@ -742,18 +732,11 @@ simpledownload(oneline, folder, proxy := false, mute := true, timeout := false)
 }
 superdat2sha1(datfile, sha1file, monitortypes, binaryexclude)
 {
-    monitorcount := monitortypes.Length()
-    finishlist := ""
-    Loop, %monitorcount%
+    monitortypecount := monitortypes.Length()
+    Loop, %monitortypecount%
     {
         monitortype := monitortypes[A_Index]
-        If monitortype In %finishlist%
-            Continue
-        dat2sha1(datfile, sha1file, A_Index - 1, SubStr(monitortype, 1, 1), SubStr(monitortype, 2, 1), binaryexclude, false)
-        If (A_Index = 1)
-            finishlist := finishlist . "," . monitortype
-        Else
-            finishlist := monitortype
+        dat2sha1(datfile, sha1file, A_Index - 1, monitortype, binaryexclude, false)
     }
     FileRead, sha1s, %sha1file%
     FileDelete, %sha1file%
@@ -794,11 +777,11 @@ superremove(sha1file, folder, simple := true, ByRef removednumberdelta := 0, ByR
             Menu, Tray, Tip, finishing: %A_Index%/%totalfilenumber%
         If A_LoopFileExt Not Contains jpg,jpeg,png,tif,tiff
             Continue
-        If (RegExMatch(A_LoopFileName, "[0-9a-f]+\.[+-]\.", sha1dotpmdot) != 1)
+        If (RegExMatch(A_LoopFileName, "[0-9a-f]{8,}\.", sha1dot) != 1)
             Continue
         file := A_LoopFileName
         filepath := folder . "\" . A_LoopFileName
-        extensions := StrReplace(A_LoopFileName, sha1dotpmdot)
+        extensions := StrReplace(A_LoopFileName, sha1dot)
         RegExMatch(extensions, "[^.]+", extension1)
         remove := true
         If (extensions = A_LoopFileExt)
@@ -840,35 +823,28 @@ superremove(sha1file, folder, simple := true, ByRef removednumberdelta := 0, ByR
     }
     FileDelete, temp-filenames.log
 }
-types2countarray(monitortypes)
+types2restrictions(typearray, countarray, restriction)
 {
-    countarray := [0, 0, 0, 0, 0, 0]
-    monitorcount := monitortypes.Length()
-    Loop, %monitorcount%
-        typeindex := matches(monitortypes[A_Index]), countarray[typeindex] := countarray[typeindex] + 1
-    Return, countarray
-}
-types2numberrestrictions(countarray)
-{
-    numberarray := [0, 0, 0, 0, 0, 0]
-    numberarray[1] := 16 * countarray[1]
-    numberarray[2] := 16 * countarray[2]
-    numberarray[3] := 9 * countarray[3]
-    numberarray[4] := 9 * countarray[4]
-    numberarray[5] := 4 * countarray[5]
-    numberarray[6] := 4 * countarray[6]
-    Return, numberarray
-}
-types2sizerestrictions(countarray)
-{
-    sizearray := [0, 0, 0, 0, 0, 0]
-    sizearray[1] := 9 * 1024 * 1024 * countarray[1]
-    sizearray[2] := 9 * 1024 * 1024 * countarray[2]
-    sizearray[3] := 16 * 1024 * 1024 * countarray[3]
-    sizearray[4] := 16 * 1024 * 1024 * countarray[4]
-    sizearray[5] := 36 * 1024 * 1024 * countarray[5]
-    sizearray[6] := 36 * 1024 * 1024 * countarray[6]
-    Return, sizearray
+    count := typearray.Length()
+    If (!count || countarray.Length() != count || ((restriction != "number") && (restriction != "size") && (restriction != "time")))
+        Return, 0
+    restrictionarray := []
+    If (restriction = "number")
+    {
+        Loop, %count%
+            restrictionarray.Push(Ceil(9 / countpixel(typearray[A_Index])))
+    }
+    Else If (restriction = "size")
+    {
+        Loop, %count%
+            restrictionarray.Push(countarray[A_Index] * Ceil(16 * countpixel(typearray[A_Index]) * 1024 * 1024))
+    }
+    Else
+    {
+        Loop, %count%
+            restrictionarray.Push(15 + Ceil((1024 / 100) * countpixel(typearray[A_Index])))
+    }
+    Return, restrictionarray
 }
 udtlp(uri, outfile, proxy := false, mute := false, timeout := false)
 {
