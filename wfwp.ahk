@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Critical, On
 Menu, Tray, Tip, initializing...
-version := "v0.19"
+version := "v0.2"
 If (A_ScriptName = "wfwpnew.exe")
 {
     FileCopy, wfwpnew.exe, wfwp.exe, 1
@@ -29,36 +29,45 @@ FileInstall, offline.png, offline.png, 1
 FileInstall, placeholder.png, placeholder.png, 1
 Loop, Files, cache\*.jpg.ex*
 {
-    nullstring := RegExReplace(A_LoopFileName, "[0-9a-f]+\.[+-]\..*\..*\.jpg\.ex[0-9]+")
+    nullstring := RegExReplace(A_LoopFileName, "[0-9a-f]{8,}\..*\..*\.jpg\.ex[0-9]+")
     If !nullstring
         FileDelete, cache\%A_LoopFileName%
 }
 CoordMode, Mouse, Screen
 CoordMode, ToolTip, Screen
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+expictures := []
 fingerprint := ""
 monitorcount := countmonitor()
 monitors := []
+monitortypecounts := []
 monitortypes := []
-expictures := []
-overuhd := false
 Loop, %monitorcount%
 {
+    expictures.Push(0)
     indexfromzero := A_Index - 1
     monitor := detectmonitor(indexfromzero)
     If monitor
     {
         fingerprint := fingerprint . monitor
         monitors.Push(monitor)
-        monitororientation := SubStr(monitor, 1, 1)
-        monitorresolution := SubStr(monitor, 2, 1)
-        If (monitorresolution = 4)
-            overuhd := true, monitorresolution := 3
-        monitortype := monitororientation . monitorresolution
-        monitortypes.Push(monitortype)
-        expictures.Push(0)
+        monitortypecount:= monitortypecounts.Length()
+        typefound := 0
+        Loop, %monitortypecount%
+        {
+            If (monitortypes[A_Index] = SubStr(monitor, 1, 10))
+                typefound := A_Index
+        }
+        If typefound
+        {
+            monitortypecounts[typefound] := monitortypecounts[typefound] + 1
+            Continue
+        }
+        monitortypecounts.Push(1)
+        monitortypes.Push(SubStr(monitor, 1, 10))
     }
 }
+monitortypecount:= monitortypes.Length()
 monitorcount := monitors.Length()
 If !monitorcount
 {
@@ -68,8 +77,6 @@ If !monitorcount
     MsgBox, , wfwp, wfwp will exit.
     ExitApp
 }
-If overuhd
-    MsgBox, , wfwp, You have a screen with resolution over UHD (3840*2160), but wfwp will still set UHD wallpapers on it, which may cause a waste.
 If setposition()
     MsgBox, , wfwp, Failed to set position. wfwp recommends you to set the display option for wallpapers as FILL manually.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -178,12 +185,11 @@ If (A_ScriptName = "wfwp.ahk")
 Menu, Tray, Add
 Menu, Tray, Add, Exit, exitmenu, P16
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-monitortypecounts := types2countarray(monitortypes)
-numberrestrictions := types2numberrestrictions(monitortypecounts)
-sizerestrictions := types2sizerestrictions(monitortypecounts)
-timerestrictions := [21, 21, 25, 25, 38, 38]
+numberrestrictions := types2restrictions(monitortypes, monitortypecounts, "number")
+sizerestrictions := types2restrictions(monitortypes, monitortypecounts, "size")
+timerestrictions := types2restrictions(monitortypes, monitortypecounts, "time")
 totalnumberrestriction := 0
-Loop, 6
+Loop, %monitortypecount%
     totalnumberrestriction := totalnumberrestriction + numberrestrictions[A_Index]
 downloading := false
 fromdatabasecheck := false
@@ -434,14 +440,16 @@ arraypm(numberrestrictionscache, numberrestrictions)
 arraypm(sizerestrictionscache, sizerestrictions)
 arraypm(sparesapces, sizerestrictionscache)
 linenumbers := ""
-linenumbers := [0, 0, 0, 0, 0, 0]
+linenumbers := []
+Loop, %monitortypecount%
+    linenumbers.Push(0)
 Loop, %totalnumberrestriction%
 {
     whichmonitor := Mod(A_Index, monitorcount)
     If !whichmonitor
         whichmonitor := monitorcount
-    whichmonitortype := monitortypes[whichmonitor]
-    whichmonitortypeindex := matches(whichmonitortype, match1, match2)
+    whichmonitortype := SubStr(monitors[whichmonitor], 1, 10)
+    whichmonitortypeindex := matches(whichmonitortype, monitortypes)
     If !Max(numberrestrictionscache*)
         Break
     If !numberrestrictionscache[whichmonitortypeindex]
@@ -450,15 +458,19 @@ Loop, %totalnumberrestriction%
     {
         If whichmonitor Not In %moveonlistreal%
         {
-            temptype := ""
-            tempcountarry := ""
+            tempcountarray := ""
             tempnumberrestriction := ""
             tempsizerestriction := ""
-            temptype := []
-            temptype.Push(whichmonitortype)
-            tempcountarry := types2countarray(temptype)
-            tempnumberrestriction := types2numberrestrictions(tempcountarry)
-            tempsizerestriction := types2sizerestrictions(tempcountarry)
+            tempcountarray := []
+            Loop, %monitortypecount%
+            {
+                If (A_Index = whichmonitortypeindex)
+                    tempcountarray.Push(1)
+                Else
+                    tempcountarray.Push(0)
+            }
+            tempnumberrestriction := types2restrictions(monitortypes, tempcountarray, "number")
+            tempsizerestriction := types2restrictions(monitortypes, tempcountarray, "size")
             arraypm(numberrestrictionscache, tempnumberrestriction, -1)
             arraypm(sizerestrictionscache, tempsizerestriction, -1)
             Continue
@@ -469,7 +481,8 @@ Loop, %totalnumberrestriction%
         Menu, Tray, Tip, caching...
         Thread, Priority, -1
     }
-    sparesapces[whichmonitortypeindex] := sizerestrictionscache[whichmonitortypeindex] - folderpicturesize("cache", match1, match2)
+    matcher := "." . whichmonitortype . "."
+    sparesapces[whichmonitortypeindex] := sizerestrictionscache[whichmonitortypeindex] - folderpicturesize("cache", matcher)
     If (Max(sparesapces*) <= 0)
         Break
     If (sparesapces[whichmonitortypeindex] <= 0)
@@ -480,7 +493,7 @@ Loop, %totalnumberrestriction%
             Continue
         RegExMatch(A_LoopReadLine, "[^ ]+", filename)
         filepath := "cache\" . filename
-        If (InStr(filename, match1) && InStr(filename, match2) && !FileExist(filepath))
+        If (InStr(filename, matcher) && !FileExist(filepath))
             oneline := A_LoopReadLine, linenumbers[whichmonitortypeindex] := A_Index
         Else
             Continue
@@ -657,7 +670,7 @@ If (monitorcount > 1)
     If !indexjustclicked
         Return
     banfilename := trackwallpaper(monitors, indexjustclicked, "cache")
-    resolutiontag := monitortypes[indexjustclicked]
+    resolutiontag := SubStr(monitors[indexjustclicked], 1, 10)
     moveonlist := indexjustclicked
     indexjustclicked := 0
 }
@@ -669,7 +682,6 @@ If (!banfilename || RegExMatch(banfilename, "tmp-[0-9]+\.jpg", , 1))
     Return
 }
 RegExMatch(banfilename, "[0-9a-f]+", bannedsha1)
-resolutiontag := Ceil(matches(resolutiontag) / 2)
 FileAppend, %bannedsha1%.%resolutiontag%`r`n, blacklist
 blacklistlength := countandsortblacklist("blacklist")
 Menu, blacklistdotmenu, Rename, 1&, Blacklist This Picture and Switch to the Next (%blacklistlength%)
@@ -686,7 +698,7 @@ Loop, Read, blacklist, blacklistcopy
 {
     If !A_LoopReadLine
         Continue
-    RegExMatch(A_LoopReadLine, "[^.]+\.[1-3]", thisline)
+    RegExMatch(A_LoopReadLine, "[^.]+\.[0-9]{10}", thisline)
     If (thisline != A_LoopReadLine)
         Continue
     RegExMatch(thisline, "[^.]+", thisline)
@@ -709,15 +721,7 @@ If !lastline
     Return
 }
 RegExMatch(lastline, "[^.]+", extractedsha1)
-extractresolution := SubStr(lastline, 0)
-If (extractresolution = 1)
-    resolutionmatch := ".fhd."
-Else If (extractresolution = 2)
-    resolutionmatch := ".qhd."
-Else If (extractresolution = 3)
-    resolutionmatch := ".uhd."
-Else
-    Return
+resolutionmatch := StrReplace(settings, extractedsha1) . "."
 online := ping(server)
 GoSub, refreshicon
 If !online
@@ -785,9 +789,7 @@ If !switchbackto
 readyformatch := 0
 Loop, %monitorcount%
 {
-    typeformatch := monitortypes[A_Index]
-    matches(typeformatch, match1formatch, match2formatch)
-    If (InStr(switchbackto, match1formatch) && InStr(switchbackto, match2formatch))
+    If (InStr(switchbackto, "." . SubStr(monitors[A_Index], 1, 10) . "."))
     {
         readyformatch := A_Index
         Break
