@@ -19,7 +19,7 @@ upload := false ; true means generating a folder containing a checksum file for 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ```
 
-Here the special values `screenorientation := 0`, `minimalresolution := 0`, and `resize := false`, can be achieved, which allows more freedom together with `download.ahk`, such as downloading all original files of Featured Pictures (but do not abuse).
+Here the special values `resolution := 0`, and `resize := false`, can be achieved, which allows more freedom together with `download.ahk`, such as downloading all original files of Featured Pictures (but do not abuse).
 
 If you want to generate a `resolved.dat` from scratch, set `update := false`, but which may take a few hours. A more convenient way is to set `update := true` and put the [upload folder](https://github.com/fjn308/wfwp) in the same folder, `featured.ahk` will only generate new items and append them after the old ones.
 
