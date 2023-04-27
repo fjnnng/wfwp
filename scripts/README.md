@@ -6,8 +6,7 @@ With Autohotkey installed, parameters of `featured.ahk` and `download.ahk` can b
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proxy := false ; false means following windows
 server := "http://127.0.0.1:1079" ; have to be http
-screenorientation := "+" ; "+"(4:3 <= landscape <= 64:27), "-"(27:64 <= portrait <= 3:4), 0(any)
-minimalresolution := 2 ; 3(uhd+), 2(qhd+), 1(fhd+), 0(any)
+resolution := "0256001440" ; "wwwwwhhhhh", 10-digit string including a 5-digit width and a 5-digit height; number 0 as any
 resize := true ; false means writing urls of original pictures (can be extremely large) to the sha1 file
 exclude := "/arthropod,/bird,/amphibian,/reptile,/oanimals,/fungi,/olifeforms"
 ; full list: "/arthropod,/bird,/ppeople,/amphibian,/fish,/reptile,/oanimals,/bone,/shell,/plant,/fungi,/olifeforms", default list: "/arthropod,/bird,/amphibian,/reptile,/oanimals,/fungi,/olifeforms", empty list: ""
