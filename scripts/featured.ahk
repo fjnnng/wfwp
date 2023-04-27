@@ -1,22 +1,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proxy := false ; false means following windows
 server := "http://127.0.0.1:1079" ; have to be http
-screenorientation := "+" ; "+"(4:3 <= landscape <= 64:27), "-"(27:64 <= portrait <= 3:4), 0(any)
-minimalresolution := 2 ; 3(uhd+), 2(qhd+), 1(fhd+), 0(any)
+resolution := "0256001440" ; "wwwwwhhhhh", 10-digit string including a 5-digit width and a 5-digit height; number 0 as any
 resize := true ; false means writing urls of original pictures (can be extremely large) to the sha1 file
 exclude := "/arthropod,/bird,/amphibian,/reptile,/oanimals,/fungi,/olifeforms"
 ; full list: "/arthropod,/bird,/ppeople,/amphibian,/fish,/reptile,/oanimals,/bone,/shell,/plant,/fungi,/olifeforms", default list: "/arthropod,/bird,/amphibian,/reptile,/oanimals,/fungi,/olifeforms", empty list: ""
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 formats := "tif,tiff,jpg,jpeg,png" ; do not edited this unless confident enough
-skipgeneratingdat := false ; true means directly using an existing resolved.dat to generate a sha1 file
-skipgeneratingsha1 := true ; true means generating a resolved.dat only
+skipgeneratingdat := true ; true means directly using an existing resolved.dat to generate a sha1 file
+skipgeneratingsha1 := false ; true means generating a resolved.dat only
 update := true ; false means generating a new resolved.dat without referencing an old one
-upload := false ; true means generating a folder containing a checksum file for uploading as well
+upload := true ; true means generating a folder containing a checksum file for uploading as well
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 generateat := A_NowUTC
 If proxy
     proxy := server
-If !minimalresolution
+If !resolution
     resize := false
 excludeedited := StrReplace(exclude, "/ppeople", "/people")
 excludeedited := StrReplace(excludeedited, "/oanimals", "/animalso")
@@ -271,23 +270,6 @@ Loop, Read, temp-titles.log, temp-resolving.dat
     maxsize := Max(size, maxsize)
     maxwidth := Max(width, maxwidth)
     maxheight := Max(height, maxheight)
-    ratio := width / height
-    If ((ratio >= 4 / 3) && (ratio <= 64 / 27))
-        orientation := "+"
-    Else If ((ratio >= 27 / 64 && (ratio <= 3 / 4)))
-        orientation := "-"
-    Else
-        orientation := "0"
-    longside := Max(width, height)
-    shortside := Min(width, height)
-    If (longside >= 3840 && shortside >= 2160)
-        resolution := 3
-    Else If (longside >= 2560 && shortside >= 1440)
-        resolution := 2
-    Else If (longside >= 1920 && shortside >= 1080)
-        resolution := 1
-    Else
-        resolution := 0
     imageusageapi := "https://commons.wikimedia.org/w/api.php?action=query&format=json&list=imageusage&iunamespace=4&iulimit=500&iutitle=" . encodedtitle
     FileDelete, temp-imageusage.json
     udtlp(imageusageapi, "temp-imageusage.json", proxy)
@@ -298,7 +280,7 @@ Loop, Read, temp-titles.log, temp-resolving.dat
     }
     FileRead, tempimageusage, temp-imageusage.json
     category := category(tempimageusage)
-    output := "sha1 = 0x" . sha1 . ", category = 0x" . category . ", orientation = " . orientation . ", resolution = " . resolution . ", size = " . size . ", width = " . width . ", height = " . height . ", url = """ . url . """, title = """ . title . """;"
+    output := "sha1 = 0x" . sha1 . ", category = 0x" . category . ", size = " . size . ", width = " . width . ", height = " . height . ", url = """ . url . """, title = """ . title . """;"
     FileAppend, %output%`r`n
     progress := progress + 1
     nod := A_Now
@@ -342,9 +324,9 @@ If skipgeneratingsha1
     Goto, skippedgeneratingsha1
 qualifiednumber := 0
 qualifiedsize := 0
-duplicatenumberplus := dat2sha1("resolved.dat", "urls" . screenorientation . minimalresolution . ".sha1", false, screenorientation, minimalresolution, binaryexclude, true, qualifiednumber, qualifiedsize, resize, false)
+duplicatenumberplus := dat2sha1("resolved.dat", "urls." . resolution . ".sha1", false, resolution, binaryexclude, true, qualifiednumber, qualifiedsize, resize, false)
 If !resize
-    FileMove, urls-%minimalresolution%.sha1, urls-%minimalresolution%-original.sha1, 1
+    FileMove, urls.%resolution%.sha1, urls.%resolution%.original.sha1, 1
 qualifiednumber := qualifiednumber - duplicatenumberplus
 skippedgeneratingsha1:
 If (totalsize != "? b")
@@ -356,9 +338,9 @@ If (totalsizeplus != "? b")
 excludematch := StrReplace(exclude, "/")
 excludematch := "category!=" . excludematch
 If (update && !skipgeneratingdat)
-    FileAppend, %generateat%: %totalsize% / %totalnumber% new pics + %totalsizeplus% / %totalnumberplus% old pics from %timestamp% database -> %qualifiedsize% / %qualifiednumber% pics`, formats=%formats% -> orientation=%screenorientation%`,resolution>=%minimalresolution%`,%excludematch%`;`r`n, stats.log
+    FileAppend, %generateat%: %totalsize% / %totalnumber% new pics + %totalsizeplus% / %totalnumberplus% old pics from %timestamp% database -> %qualifiedsize% / %qualifiednumber% pics`, formats=%formats% -> resolution~%resolution%`,%excludematch%`;`r`n, stats.log
 Else
-    FileAppend, %generateat%: %totalsize% / %totalnumber% pics (excl / excl %duplicatenumber% dups) -> %qualifiedsize% / %qualifiednumber% pics (incl / excl %duplicatenumberplus% dups)`, formats=%formats% -> orientation=%screenorientation%`,resolution>=%minimalresolution%`,%excludematch%`;`r`n, stats.log
+    FileAppend, %generateat%: %totalsize% / %totalnumber% pics (excl / excl %duplicatenumber% dups) -> %qualifiedsize% / %qualifiednumber% pics (incl / excl %duplicatenumberplus% dups)`, formats=%formats% -> resolution~%resolution%`,%excludematch%`;`r`n, stats.log
 If (upload && !skipgeneratingdat)
 {
     FileRemoveDir, upload, 1
