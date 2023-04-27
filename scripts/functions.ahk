@@ -23,10 +23,10 @@ detectmonitor(indexfromzero)
         Return, 0
     If ((width <= 0) || (height <= 0))
         Return, 0
-    If ((width >= 6400) || (height >= 6400))
+    If ((width > 6400) || (height > 6400))
     {
-        width := width * 99999 / Max(width, height)
-        height := height * 99999 / Max(width, height)
+        width := width * 6400 / Max(width, height)
+        height := height * 6400 / Max(width, height)
     }
     Return, Format("{:05u}", width) . Format("{:05u}", height) . path 
 }
