@@ -41,6 +41,7 @@ Loop, Read, %inputfile%
     filename := SubStr(A_LoopReadLine, 1, firstblankminus1)
     renameto := "download\" . filename
     RegExMatch(A_LoopReadLine, "https://.*", url)
+    sha1error := 0
     redownload:
     If FileExist(renameto)
     {
@@ -59,8 +60,9 @@ Loop, Read, %inputfile%
         FileDelete, %renameto%
         If InStr(url, "/thumb/")
         {
-            If (restrictioninmb = 0)
+            If !restrictioninmb
             {
+                totalnumber := totalnumber + 1
                 FileAppend, [%A_Now%] [resizing failed] [original skipped]  %url%`r`n, errors.log
                 Continue
             }
@@ -90,12 +92,15 @@ Loop, Read, %inputfile%
             If (size < restrictioninb)
             {
                 FileAppend, [%A_Now%] [resizing failed] [original fetched]  %urlcache%`r`n, errors.log
-                RegExMatch(filename, "[0-9a-f]+\.[+-]\.[^.]+", originalfilename)
+                RegExMatch(filename, "[0-9a-f]{8,}\.[^.]+", originalfilename)
                 renameto := "download\" . originalfilename
                 Goto, redownload
             }
             Else
+            {
+                totalnumber := totalnumber + 1
                 FileAppend, [%A_Now%] [resizing failed] [original oversized] %urlcache%`r`n, errors.log
+            }
         }
         Else
         {
@@ -108,6 +113,14 @@ Loop, Read, %inputfile%
         If (!InStr(url, "/thumb/") && !InStr(renameto, sha(renameto, true)))
         {
             FileDelete, %renameto%
+            If sha1error
+            {
+                totalnumber := totalnumber + 1
+                FileAppend, [%A_Now%] [suspicious sha1] %url%`r`n, errors.log
+                Continue
+            }
+            Else
+                sha1error = 1
             Goto, redownload
         }
         totalnumber := totalnumber + 1
