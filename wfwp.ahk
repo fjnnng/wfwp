@@ -986,7 +986,7 @@ Gui, Tab, 1
 Gui, Add, Text, xm ym
 Gui, Add, Text, xm y+m
 Gui, Add, Text, x+m y+m Section, Connect via a Proxy:
-Gui, Add, CheckBox, x+m %proxychecked% vproxy, http://
+Gui, Add, CheckBox, x+m -Wrap %proxychecked% vproxy, http://
 Gui, Add, Edit, x+0 Limit3 Number vip1, %ip1%
 Gui, Add, Text, x+0, .
 Gui, Add, Edit, x+0 Limit3 Number vip2, %ip2%
@@ -1015,20 +1015,20 @@ Gui, Add, Text, xm ym
 Gui, Add, Text, xm y+m
 Gui, Add, Text, x+m y+m Section, Some categories of pictures, which may not be proper as wallpapers, can
 Gui, Add, Link, xs y+m, be checked and excluded here (visit <a href="https://commons.wikimedia.org/wiki/Commons:Featured_pictures">this page</a> for more information):`n
-Gui, Add, CheckBox, xs y+m %arthropodchecked% varthropod, Arthropods ` ` ` ` ` ` `
-Gui, Add, CheckBox, x+m wp %birdchecked% vbird, Birds
-Gui, Add, CheckBox, x+m wp Disabled, Mammals
-Gui, Add, CheckBox, xs y+m wp %amphibianchecked% vamphibian, Amphibians
-Gui, Add, CheckBox, x+m wp %fishchecked% vfish, Fish
-Gui, Add, CheckBox, x+m wp %reptilechecked% vreptile, Reptiles
-Gui, Add, CheckBox, xs y+m wp %oanimalschecked% voanimals, Other Animals
-Gui, Add, CheckBox, x+m wp %bonechecked% vbone, Bones and Fossils
-Gui, Add, CheckBox, x+m wp %shellchecked% vshell, Shells
-Gui, Add, CheckBox, xs y+m wp %plantchecked% vplant, Plants
-Gui, Add, CheckBox, x+m wp %fungichecked% vfungi, Fungi
-Gui, Add, CheckBox, x+m wp %olifeformschecked% volifeforms, Other Lifeforms
+Gui, Add, CheckBox, xs y+m -Wrap %arthropodchecked% varthropod, Arthropods ` ` ` ` ` ` `
+Gui, Add, CheckBox, x+m wp -Wrap %birdchecked% vbird, Birds
+Gui, Add, CheckBox, x+m wp Disabled -Wrap, Mammals
+Gui, Add, CheckBox, xs y+m wp -Wrap %amphibianchecked% vamphibian, Amphibians
+Gui, Add, CheckBox, x+m wp -Wrap %fishchecked% vfish, Fish
+Gui, Add, CheckBox, x+m wp -Wrap %reptilechecked% vreptile, Reptiles
+Gui, Add, CheckBox, xs y+m wp -Wrap %oanimalschecked% voanimals, Other Animals
+Gui, Add, CheckBox, x+m wp -Wrap %bonechecked% vbone, Bones and Fossils
+Gui, Add, CheckBox, x+m wp -Wrap %shellchecked% vshell, Shells
+Gui, Add, CheckBox, xs y+m wp -Wrap %plantchecked% vplant, Plants
+Gui, Add, CheckBox, x+m wp -Wrap %fungichecked% vfungi, Fungi
+Gui, Add, CheckBox, x+m wp -Wrap %olifeformschecked% volifeforms, Other Lifeforms
 Gui, Add, Text, y+m
-Gui, Add, CheckBox, xs y+m %ppeoplechecked% vppeople, Reduce Portraits of People on Portrait (Non-Landscape) Monitors
+Gui, Add, CheckBox, xs y+m -Wrap %ppeoplechecked% vppeople, Reduce Portraits of People on Portrait (Non-Landscape) Monitors
 Gui, Tab
 Gui, Add, Link, xm y+m wp Right Section, <a href="https://github.com/fjn308/wfwp">About wfwp</a> `
 Gui, Add, Text, xm ys, ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
