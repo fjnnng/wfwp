@@ -41,7 +41,7 @@ Loop, Read, %inputfile%
     filename := SubStr(A_LoopReadLine, 1, firstblankminus1)
     renameto := "download\" . filename
     RegExMatch(A_LoopReadLine, "https://.*", url)
-    sha1error := 0
+    sha1error := false
     redownload:
     If FileExist(renameto)
     {
@@ -120,7 +120,7 @@ Loop, Read, %inputfile%
                 Continue
             }
             Else
-                sha1error = 1
+                sha1error = true
             Goto, redownload
         }
         totalnumber := totalnumber + 1
