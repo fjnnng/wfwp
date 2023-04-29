@@ -773,9 +773,23 @@ If !switchbackto
     Menu, blacklistdotmenu, Rename, 1&, Blacklist This Picture and Switch to the Next (%blacklistlength%)
     Return
 }
-Menu, Tray, Tip, reloading...
-switchbackto := simpledownload(switchbackto, "cache", server, timerestrictions[2 * extractresolution])
-Menu, Tray, Tip, wfwp
+readyformatch := 0
+readyformatchtimerestriction := 0
+Loop, %monitorcount%
+{
+    If (InStr(switchbackto, "." . SubStr(monitors[A_Index], 1, 10) . "."))
+    {
+        readyformatch := A_Index
+        readyformatchtimerestriction := timerestrictions[matches(SubStr(monitors[readyformatch], 1, 10), monitortypes)]
+        Break
+    }
+}
+If readyformatch
+{
+    Menu, Tray, Tip, reloading...
+    switchbackto := simpledownload(switchbackto, "cache", server, readyformatchtimerestriction)
+    Menu, Tray, Tip, wfwp
+}
 If !switchbackto
 {
     FileAppend, %lastline%`r`n, blacklist
@@ -783,15 +797,6 @@ If !switchbackto
     Menu, blacklistdotmenu, Rename, 1&, Blacklist This Picture and Switch to the Next (%blacklistlength%)
     TrayTip, , Failed to download. The blacklist remains untouched., , 16
     Return
-}
-readyformatch := 0
-Loop, %monitorcount%
-{
-    If (InStr(switchbackto, "." . SubStr(monitors[A_Index], 1, 10) . "."))
-    {
-        readyformatch := A_Index
-        Break
-    }
 }
 switchbackto := A_ScriptDir . "\" . switchbackto
 If (!readyformatch || switchwallpaper(switchbackto, monitors, readyformatch, true, "cache"))
