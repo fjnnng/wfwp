@@ -65,8 +65,8 @@ Except for the wallpapers, which come from Wikimedia Commons, the icons used in 
 
 ```
 wfwp.ico:        https://commons.wikimedia.org/static/favicon/commons.ico
-online.png:      https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/48px-Wikimedia-logo.svg.png
-offline.png:     https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Wikimedia-logo_black.svg/48px-Wikimedia-logo_black.svg.png
+online.png:      https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/256px-Wikimedia-logo.svg.png
+offline.png:     https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Wikimedia-logo_black.svg/256px-Wikimedia-logo_black.svg.png
 placeholder.png: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/720px-Commons-logo.svg.png
 ```
 
