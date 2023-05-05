@@ -371,8 +371,8 @@ dat2sha1(datfile, sha1file, append := false, monitortype := "0256001440", binary
         If ((StrLen(monitortype) != 10) || !monitortype)
             monitortype := "0000000000", resize := false
     }
-    monitorwidth := SubStr(monitortype, 1, 5)
-    monitorheight := SubStr(monitortype, 6, 5)
+    monitorwidth := Format("{:u}", SubStr(monitortype, 1, 5))
+    monitorheight := Format("{:u}", SubStr(monitortype, 6, 5))
     If monitorheight
         monitorratio := monitorwidth / monitorheight
     Else
@@ -423,15 +423,10 @@ dat2sha1(datfile, sha1file, append := false, monitortype := "0256001440", binary
         If resize
         {
             outputsha1 := sha1 . "." . headforresized
-            reference := ratio - monitorratio
-            If (ratio > 1)
-                targetwidth := monitorwidth, targetheight := monitorheight
+            If (ratio > monitorratio)
+                resizeto := Round(width * monitorheight / height)
             Else
-                targetwidth := monitorheight, targetheight := monitorwidth
-            If (reference > 0)
-                resizeto := Round(targetheight * width / height)
-            Else
-                resizeto := targetwidth
+                resizeto := monitorwidth
             tie := "/" . resizeto . "px-"
             RegExMatch(url, "https.*/", parta)
             partb := StrReplace(url, parta)
