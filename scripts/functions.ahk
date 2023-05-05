@@ -424,7 +424,7 @@ dat2sha1(datfile, sha1file, append := false, monitortype := "0256001440", binary
         {
             outputsha1 := sha1 . "." . headforresized
             If (ratio > monitorratio)
-                resizeto := Round(width * monitorheight / height)
+                resizeto := Round(monitorheight * ratio)
             Else
                 resizeto := monitorwidth
             tie := "/" . resizeto . "px-"
