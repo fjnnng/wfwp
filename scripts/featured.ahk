@@ -33,7 +33,7 @@ If skipgeneratingdat
 {
     If !FileExist("resolved.dat")
         ExitApp
-    Goto, skippedformatting
+    Goto, skippedgeneratingdat
 }
 FormatTime, currentyear, %generateat%, yyyy
 FormatTime, currentmonth, %generateat%, M
@@ -298,14 +298,14 @@ FileDelete, temp-imageinfo.json
 FileDelete, temp-imageusage.json
 FileDelete, temp-titles.log
 If update
-    linestoformat := totalnumber + totalnumberplus
-Else
-    linestoformat := totalnumber
-If update
 {
+    linestoformat := totalnumber + totalnumberplus
     FileAppend, updated@%generateat%`r`n, temp-resolving.dat
-    FileMove, temp-resolving.dat, resolved.dat, 1
-    Goto, skippedformatting
+}
+Else
+{
+    linestoformat := totalnumber
+    FileAppend, generated@%generateat%`r`n, temp-resolving.dat
 }
 FileDelete, temp-formatting.dat
 Loop, Read, temp-resolving.dat, temp-formatting.dat
@@ -316,10 +316,9 @@ Loop, Read, temp-resolving.dat, temp-formatting.dat
     formattedoutput := formatoutputdec(formattedoutput, "height", maxheight)
     FileAppend, %formattedoutput%`r`n
 }
-FileAppend, generated@%generateat%`r`n, temp-formatting.dat
 FileDelete, temp-resolving.dat
 FileMove, temp-formatting.dat, resolved.dat, 1
-skippedformatting:
+skippedgeneratingdat:
 If skipgeneratingsha1
     Goto, skippedgeneratingsha1
 qualifiednumber := 0
