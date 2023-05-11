@@ -28,7 +28,7 @@ detectmonitor(indexfromzero)
         width := width * 6400 / Max(width, height)
         height := height * 6400 / Max(width, height)
     }
-    Return, Format("{:05u}", width) . Format("{:05u}", height) . path 
+    Return, Format("{:04u}", width) . Format("{:04u}", height) . path 
 }
 detectmonitorpath(indexfromzero)
 {
@@ -56,7 +56,7 @@ switchwallpaper(filepathfull, monitors, monitorindex, flashex := false, filter :
 {
     If flashex
         flashex := trackwallpaper(monitors, monitorindex, filter)
-    monitorpath := SubStr(monitors[monitorindex], 11)
+    monitorpath := SubStr(monitors[monitorindex], 9)
     idesktopwallpaper := ComObjCreate("{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}", "{B92B56A9-8B55-4E14-9A89-0199BBB6F93B}")
     offset := 3 * A_PtrSize
     DllCall(NumGet(NumGet(idesktopwallpaper+0), offset), "Ptr", idesktopwallpaper, "Ptr", &monitorpath, "WStr", filepathfull)
@@ -74,7 +74,7 @@ switchwallpaper(filepathfull, monitors, monitorindex, flashex := false, filter :
 }
 trackwallpaper(monitors, monitorindex, filter := false)
 {
-    monitorpath := SubStr(monitors[monitorindex], 11)
+    monitorpath := SubStr(monitors[monitorindex], 9)
     idesktopwallpaper := ComObjCreate("{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}", "{B92B56A9-8B55-4E14-9A89-0199BBB6F93B}")
     offset := 4 * A_PtrSize
     DllCall(NumGet(NumGet(idesktopwallpaper+0), offset), "Ptr", idesktopwallpaper, "Ptr", &monitorpath, "Ptr*", pointer)
@@ -142,7 +142,7 @@ randomdisplayothers(folder, monitors, moveonlist, flashex := false)
         }
         current := trackwallpaper(monitors, A_Index, folder)
         monitor := monitors[A_Index]
-        matcher := "." . SubStr(monitor, 1, 10) . "."
+        matcher := "." . SubStr(monitor, 1, 8) . "."
         randomlist := ""
         Loop, Files, %folder%\*.*
         {
@@ -352,27 +352,27 @@ countdown(seconds)
 }
 countpixel(monitortype)
 {
-    If (StrLen(monitortype) != 10)
+    If (StrLen(monitortype) != 8)
         Return, 0
-    Return, SubStr(monitortype, 1, 5) * SubStr(monitortype, 6, 5) / (2560 * 1440)
+    Return, SubStr(monitortype, 1, 4) * SubStr(monitortype, 5, 4) / (2560 * 1440)
 }
-dat2sha1(datfile, sha1file, append := false, monitortype := "0256001440", binaryexclude := "0x0000", removeduplicate := true, ByRef qualifiednumberdelta := 0, ByRef qualifiedsizedelta := 0, resize := true, safetylock := true)
+dat2sha1(datfile, sha1file, append := false, monitortype := "25601440", binaryexclude := "0x0000", removeduplicate := true, ByRef qualifiednumberdelta := 0, ByRef qualifiedsizedelta := 0, resize := true, safetylock := true)
 {
     If !append
         FileDelete, %sha1file%
     If safetylock
     {
         resize := true
-        If (StrLen(monitortype) != 10)
-            monitortype := "0256001440"
+        If (StrLen(monitortype) != 8)
+            monitortype := "25601440"
     }
     Else
     {
-        If ((StrLen(monitortype) != 10) || !monitortype)
-            monitortype := "0000000000", resize := false
+        If ((StrLen(monitortype) != 8) || !monitortype)
+            monitortype := "00000000", resize := false
     }
-    monitorwidth := Format("{:u}", SubStr(monitortype, 1, 5))
-    monitorheight := Format("{:u}", SubStr(monitortype, 6, 5))
+    monitorwidth := Format("{:u}", SubStr(monitortype, 1, 4))
+    monitorheight := Format("{:u}", SubStr(monitortype, 5, 4))
     If monitorheight
         monitorratio := monitorwidth / monitorheight
     Else
