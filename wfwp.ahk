@@ -55,7 +55,7 @@ Loop, %monitorcount%
         typefound := 0
         Loop, %monitortypecount%
         {
-            If (monitortypes[A_Index] = SubStr(monitor, 1, 10))
+            If (monitortypes[A_Index] = SubStr(monitor, 1, 8))
                 typefound := A_Index
         }
         If typefound
@@ -64,7 +64,7 @@ Loop, %monitorcount%
             Continue
         }
         monitortypecounts.Push(1)
-        monitortypes.Push(SubStr(monitor, 1, 10))
+        monitortypes.Push(SubStr(monitor, 1, 8))
     }
 }
 monitortypecount:= monitortypes.Length()
@@ -448,7 +448,7 @@ Loop, %totalnumberrestriction%
     whichmonitor := Mod(A_Index, monitorcount)
     If !whichmonitor
         whichmonitor := monitorcount
-    whichmonitortype := SubStr(monitors[whichmonitor], 1, 10)
+    whichmonitortype := SubStr(monitors[whichmonitor], 1, 8)
     whichmonitortypeindex := matches(whichmonitortype, monitortypes)
     If !Max(numberrestrictionscache*)
         Break
@@ -670,7 +670,7 @@ If (monitorcount > 1)
     If !indexjustclicked
         Return
     banfilename := trackwallpaper(monitors, indexjustclicked, "cache")
-    resolutiontag := SubStr(monitors[indexjustclicked], 1, 10)
+    resolutiontag := SubStr(monitors[indexjustclicked], 1, 8)
     moveonlist := indexjustclicked
     indexjustclicked := 0
 }
@@ -777,10 +777,10 @@ readyformatch := 0
 readyformatchtimerestriction := 0
 Loop, %monitorcount%
 {
-    If (InStr(switchbackto, "." . SubStr(monitors[A_Index], 1, 10) . "."))
+    If (InStr(switchbackto, "." . SubStr(monitors[A_Index], 1, 8) . "."))
     {
         readyformatch := A_Index
-        readyformatchtimerestriction := timerestrictions[matches(SubStr(monitors[readyformatch], 1, 10), monitortypes)]
+        readyformatchtimerestriction := timerestrictions[matches(SubStr(monitors[readyformatch], 1, 8), monitortypes)]
         Break
     }
 }
