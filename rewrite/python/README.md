@@ -2,4 +2,4 @@
 - the ahk approach to windows api is only a temporary workaround
   - it may be replaced by a pure python approach, or
   - the whole rewrite may be replaced by another cpp rewrite
-- all these rewrites are more of exercises for the programming languages, for the ahk version is enough for daily use, except for not supporting macos
+- all these rewrites are more of exercises for the programming languages, for the ahk version is just enough for daily use (but i have to admit that too many wheels have to be invented there), except for not supporting macos 
