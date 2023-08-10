@@ -1203,18 +1203,18 @@ Return
 refreshicon:
 If (!online && FileExist("offline.png"))
     Menu, Tray, Icon, offline.png
-; Else If (((A_MM = "10") && (A_DD = "30")) || ((A_MM = "10") && (A_DD = "31")) || ((A_MM = "11") && (A_DD = "01")))
-; {
-;     FileInstall, cache\1f383.png, cache\1f383.png, 1
-;     If FileExist("cache\1f383.png")
-;         Menu, Tray, Icon, cache\1f383.png
-; }
-; Else If (((A_MM = "12") && (A_DD = "24")) || ((A_MM = "12") && (A_DD = "25")) || ((A_MM = "12") && (A_DD = "26")))
-; {
-;     FileInstall, cache\1f384.png, cache\1f384.png, 1
-;     If FileExist("cache\1f384.png")
-;         Menu, Tray, Icon, cache\1f384.png
-; }
+Else If (((A_MM = "10") && (A_DD = "30")) || ((A_MM = "10") && (A_DD = "31")) || ((A_MM = "11") && (A_DD = "01")))
+{
+    FileInstall, cache\1f383.png, cache\1f383.png, 1
+    If FileExist("cache\1f383.png")
+        Menu, Tray, Icon, cache\1f383.png
+}
+Else If (((A_MM = "12") && (A_DD = "24")) || ((A_MM = "12") && (A_DD = "25")) || ((A_MM = "12") && (A_DD = "26")))
+{
+    FileInstall, cache\1f384.png, cache\1f384.png, 1
+    If FileExist("cache\1f384.png")
+        Menu, Tray, Icon, cache\1f384.png
+}
 Else
 {
     If FileExist("online.png")
