@@ -1077,7 +1077,7 @@ If !datfilelength
         }
     }
     Else
-        TrayTip, , It is the first run. wfwp is downloading the database., , 16
+        TrayTip, , This is the first run. wfwp is downloading the database., , 16
     GoSub, updatedatamenu
     fromdatabasecheck := false
     Goto, databasecheck
