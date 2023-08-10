@@ -825,7 +825,7 @@ If !online
 reupdatedat:
 FileCreateDir, update
 Menu, Tray, Tip, updating...
-udtlp("https://raw.githubusercontent.com/fjn308/wfwp/main/upload/sha256andtimestamp.log", "update\sha256andtimestamp.log", server, true, 16)
+udtlp("https://raw.githubusercontent.com/fjnnng/wfwp/main/upload/sha256andtimestamp.log", "update\sha256andtimestamp.log", server, true, 16)
 If ErrorLevel
 {
     Menu, Tray, Tip, wfwp
@@ -851,7 +851,7 @@ If !fromdatabasecheck
         Return
     }
 }
-udtlp("https://raw.githubusercontent.com/fjn308/wfwp/main/upload/resolved.dat", "update\reference.dat", server, true, 64)
+udtlp("https://raw.githubusercontent.com/fjnnng/wfwp/main/upload/resolved.dat", "update\reference.dat", server, true, 64)
 Menu, Tray, Tip, wfwp
 If ErrorLevel
 {
@@ -886,7 +886,7 @@ If !online
 reupdatewfwp:
 FileCreateDir, update
 Menu, Tray, Tip, updating...
-udtlp("https://api.github.com/repos/fjn308/wfwp/releases/latest", "update\github.json", server, true, 16)
+udtlp("https://api.github.com/repos/fjnnng/wfwp/releases/latest", "update\github.json", server, true, 16)
 If ErrorLevel
 {
     TrayTip, , Failed to check., , 16
@@ -899,7 +899,7 @@ If (version = github)
     TrayTip, , No need to update., , 16
     Goto, quit
 }
-udtlp("https://github.com/fjn308/wfwp/releases/latest/download/wfwp.exe", "update\wfwp.exe", server, true, 32)
+udtlp("https://github.com/fjnnng/wfwp/releases/latest/download/wfwp.exe", "update\wfwp.exe", server, true, 32)
 If ErrorLevel
 {
     TrayTip, , Failed to download., , 16
@@ -911,7 +911,7 @@ If (binsize < 4096)
     TrayTip, , wfwp is missing. Update is aborted., , 16
     Goto, quit
 }
-udtlp("https://github.com/fjn308/wfwp/releases/latest/download/sha256", "update\sha256", server, true, 16)
+udtlp("https://github.com/fjnnng/wfwp/releases/latest/download/sha256", "update\sha256", server, true, 16)
 If ErrorLevel
 {
     TrayTip, , Failed to fetch checksum., , 16
@@ -1035,7 +1035,7 @@ Gui, Add, CheckBox, x+m wp -Wrap %olifeformschecked% volifeforms, Other Lifeform
 Gui, Add, Text, y+m
 Gui, Add, CheckBox, xs y+m -Wrap %ppeoplechecked% vppeople, Reduce Portraits of People on Portrait (Non-Landscape) Monitors
 Gui, Tab
-Gui, Add, Link, xm y+m wp Right Section, <a href="https://github.com/fjn308/wfwp">About wfwp</a> `
+Gui, Add, Link, xm y+m wp Right Section, <a href="https://github.com/fjnnng/wfwp">About wfwp</a> `
 Gui, Add, Button, xm y+0 Center -Wrap gsubmitbutton, ` ` Save and Exit ` `
 Gui, Add, Button, x+m wp Center -Wrap grestorebutton, Restore Default
 Gui, Show, Center
