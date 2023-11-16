@@ -30,7 +30,7 @@ Here is a real example:
 
 # 3. Things You Need to Know
 
-- `wfwp` chooses suitable pictures basing on the resolutions of your monitors. For example, if the resolution is 4K, that is, `width = 3840`, `height = 2160` and `ratio = 16:9`, only pictures whose `width >= 3840`, `height >= 2160` and `4:3 <= ratio <= 64:27` are capable, where their orientations are also considered. `wfwp` supports monitors whose long sides up to 6400 pixels, which covers 6K (6016\*3384, e.g. Apple Pro Display XDR) and DWQHD (5120*1440, Dual Wide Quad HD).
+- `wfwp` chooses suitable pictures basing on the resolutions of your monitors. For example, if the resolution is 4K, that is, `width = 3840`, `height = 2160` and `ratio = 16:9`, only pictures whose `width >= 3840`, `height >= 2160` and `4:3 <= ratio <= 64:27` are capable, where their orientations are also considered. `wfwp` supports monitors whose long sides up to 6400 pixels, which covers 6K (6016\*3384, e.g. Apple Pro Display XDR) and DQHD (5120*1440, Dual Quad HD).
 
 - `wfwp` caches pictures to ensure smooth switches. For each monitor, there is an independent limitation on its cache. Examples:
   - FHD (1920*1080): ~9MB FHD pictures resized from higher resolution ones;
