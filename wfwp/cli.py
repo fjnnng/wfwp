@@ -192,17 +192,15 @@ class MediaPlayer:
             if item:
                 indexes.append(index)
             index += 1
+        if len(indexes) == 0:
+            self.callback(None, "select", "[]")
+            return []
         if len(indexes) != 1 and not allmonitors:
             indexes = self.selectdialog(indexes, attrname)
         return indexes
 
     def selectdialog(self, indexes, attrname):
         # "all" is a special input for self.switch()
-        if len(indexes) == 0:
-            confirm = input("switch?")
-            if confirm.lower().startswith("y"):
-                self.switch()
-            return []
         text = "select from " + str(indexes)
         if attrname == "monitors":
             index = input(text + ' and "all":')
@@ -420,7 +418,7 @@ class MediaPlayer:
             else:
                 result = "connected"
             fnc.info("[player] internet " + result)
-        elif source in ["details", "detect", "switch"]:
+        elif source in ["details", "detect", "select", "switch"]:
             (result,) = args
         return result
 
@@ -459,7 +457,7 @@ class LogRedirector:
         return self._closed
 
     def __getattr__(self, name):
-        self.logger.warning("[logredirector] method unimplemented: " + name)
+        self.logger.warning("[" + self.source + "] method unimplemented: " + name)
         return lambda *args, **kwargs: None
 
 
@@ -477,7 +475,6 @@ def initialize(filename=""):
         config["filename"] = filename
     basicConfig(**config)
     if "filename" in config:
-        sys.stdout = LogRedirector("stdout", "info")
         sys.stderr = LogRedirector("stderr", "error")
         fnc.PROBAR = False
     if not fnc.PLATFORM:

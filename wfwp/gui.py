@@ -124,6 +124,8 @@ class QMediaPlayer(MediaPlayer):
                 self.tray.refreshtip("Detecting...")
             else:
                 self.tray.refreshtip()
+        elif source == "select":
+            fnc.warning("[tray] noting selected")
         elif source == "switch":
             if result == "_block":
                 self.tray.refreshtip("Switching...")
@@ -309,7 +311,8 @@ class Tray:
             self.player.switch("all")
 
     def refreshmenu(self):
-        # disables the invalid buttons to exclude the len(indexes) == 0 case as in MediaPlayer.selectdialog()
+        # disables the invalid buttons to prevent the len(indexes) == 0 case as in MediaPlayer.select() to the max
+        self.player.detect()
         monitorcount = str(len(self.player.monitors))
         cachecount = str(len(self.player.medialibrary.caches))
         datacount = (
