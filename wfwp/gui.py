@@ -183,16 +183,14 @@ class Tray:
         self.clearblacklist = QAction("Clear the Blacklist")
         self.blacklistmenu.addActions([self.blacklist, self.clearblacklist])
         self.manualmenu = self.menu.addMenu("Manual...")
-        self.detecttext = "Detect Monitors (?)"
         self.cachetext = "Cache Manually (?)"
         self.statstext = "Show Stats (?)"
         self.abouttext = "About wfwp (?)"
         self.verstamp = ""
-        self.detect = QAction(self.detecttext)
         self.cache = QAction(self.cachetext)
         self.stats = QAction(self.statstext)
         self.about = QAction(self.abouttext)
-        self.manualmenu.addActions([self.detect, self.cache, self.stats, self.about])
+        self.manualmenu.addActions([self.cache, self.stats, self.about])
         self.menu.addSeparator()
         self.configure = QAction("Configure")
         self.quit = QAction("Quit")
@@ -242,7 +240,6 @@ class Tray:
         self.original.triggered.connect(warpinfo(self.player.original))
         self.blacklist.triggered.connect(warpinfo(self.player.blacklist))
         self.clearblacklist.triggered.connect(warpinfo(self.player.clearblacklist))
-        self.detect.triggered.connect(warpinfo(self.player.detect))
         self.cache.triggered.connect(warpinfo(self.player.cache))
         self.stats.triggered.connect(warpinfo(self.player.stats))
         self.about.triggered.connect(warpinfo(self.openurl, "", fnc.URL))
@@ -313,15 +310,14 @@ class Tray:
     def refreshmenu(self):
         # disables the invalid buttons to prevent the len(indexes) == 0 case as in MediaPlayer.select() to the max
         self.player.detect()
-        monitorcount = str(len(self.player.monitors))
         cachecount = str(len(self.player.medialibrary.caches))
+        monitorcount = str(len(self.player.monitors))
         datacount = (
             str(self.player.medialibrary.playtable.count)
             + "/"
             + str(self.player.medialibrary.count)
         )
-        self.detect.setText(self.detecttext.replace("?", monitorcount))
-        self.cache.setText(self.cachetext.replace("?", cachecount))
+        self.cache.setText(self.cachetext.replace("?", cachecount + "/" + monitorcount))
         self.stats.setText(self.statstext.replace("?", datacount))
         if (
             self.update not in self.menu.actions()

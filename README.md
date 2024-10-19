@@ -16,8 +16,12 @@ Download an executable from the "Releases" page and run it. If you encounter a m
 - But if there is only one monitor to "Switch", or only one monitor recently set a wallpaper by wfwp to "Switch Back", wfwp will not ask. Further, if there is no such monitor, the corresponding buttons will be disabled. The same principle also applies to the "Details", "Original", and "Blacklist" buttons.
 - If an interval of time is set in "Configure" -> "Switch", wfwp will automatically cache and switch wallpapers for all monitors, and any monitor whose wallpapers were not set by wfwp will be switched immediately. Otherwise, things need to be done manually, and to avoid waiting after every click of "Switch", try "Manual..." -> "Cache Manually" in advance.
 - wfwp manages wallpapers automatically. For each monitor, a reasonable bound to the total size of wallpapers is set. wfwp preserves the latest wallpaper in case you want to revert to it and deletes older ones.
-- wfwp redetects monitors before every action requiring an up-to-date list of them and after every time an added or removed screen signals from Qt. But Qt is not always reliable and wfwp is not designed to be aggressive, so sometimes "Manual..." -> "Detect Monitors" may be useful.
+- wfwp redetects monitors every time an added or removed screen signals from Qt. But Qt is not always reliable and wfwp is not designed to be aggressive. ***Sometimes manually redetect monitors by right-clicking the tray icon may be useful.***
 - ***If the tray icon turns gray, the Internet is detected as disconnected.*** This is a consequence of a failed attempt to download. Afterwards, wfwp will check the connectivity every minute, until connected or a picture downloaded successfully.
+- Information shown in the "Manual" sub-menu:
+  - Cache Manually (`<cached wallpapers>/<detected monitors>`)
+  - Show Stats (`<useful pictures>/<all pictures>`): `<useful pictures>` counts the pictures fit at least one monitor and are not blacklisted/excluded by sha1s/categories among `<all pictures>` in the database.
+  - About wfwp (`<wfwp version>-<database version>`)
 - For more useful information, see "2.4 Tips".
 
 ## 2. Other Usages
