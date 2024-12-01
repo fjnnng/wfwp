@@ -21,7 +21,7 @@ jobs:
           include-data-files: |
             data/database.pickle=data/database.pickle
             data/icon.ico=data/icon.ico
-          onefile: true
+          mode: onefile
           mingw64: true
           output-dir: .
           output-file: wfwp.exe
