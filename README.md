@@ -133,3 +133,32 @@ cwd/
 ## 3. Licensing
 
 The code of wfwp is licensed under the MIT License. `data/icon.ico` in this repository is a copy of the [favicon](https://commons.wikimedia.org/static/favicon/commons.ico) of [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page), and its [original file](https://commons.wikimedia.org/wiki/File:Commons-logo.svg) is licensed under the [CC BY-SA 3.0 License](https://creativecommons.org/licenses/by-sa/3.0/deed.en). wfwp uses it as its icon. wfwp also uses comtypes (MIT), Nuitka (Apache 2.0), PySide6 (LGPLv3), Requests (Apache 2.0), and tqdm (MPL 2.0 and MIT) as its direct dependencies. As for the full dependencies reported by `pip freeze`, please see the releases.
+
+## 4. More Details about the Database
+
+This section is served as a "Wiki" and is for developers and advanced users.
+
+Before each switch, wfwp randomly selects a picture from a shortlist generated for the specific resolution of the screen, where every suitable picture from all 17,000+ Featured Pictures is included. To make this possible, information about all these pictures should be accessible locally. `database.json` in `/data` is the file that stores such information. To speed up the reading time, wfwp works with `database.pickle` instead, a binary serialization of the object initialized by reading `database.json`.
+
+Low-level tools for dealing with the database are defined in `dat.py` in `wfwp/`, with the most useful one, the update tool, redirected to `cli.py` as `--updatedatabase`. Typical users need not care about the database, because it is updated monthly and shipped with the latest releases.
+
+The data is collected using the `query` module of [MediaWiki API](https://commons.wikimedia.org/w/api.php):
+
+- `images` requests `title=File:<title>.<ext>` of all pictures from every half year listed at the top of [Commons:Featured pictures/chronological](https://commons.wikimedia.org/wiki/Commons:Featured_pictures/chronological).
+- `imageinfo` requests `url=https://upload.wikimedia.org/wikipedia/commons/<pad>/<title>.<ext>`, `<sha1>`, `<size>`, `<width>`, and `<height>`, of `title`, where `<pad>=h/hh`, with each `h` representing a hexadecimal digit.
+- `imageusage` requests all pages that use `title`, from which a `<cat>` can be calculated by matching selected key words from the categories listed at the bottom of [Commons:Featured_pictures](https://commons.wikimedia.org/wiki/Commons:Featured_pictures).
+
+The database stores all these eight bracket-enclosed values for every picture. Here are their usages:
+
+- `<pad>`, `<title>`, and `<ext>` are used to restore all URLs. While switching, a parameter specifying the target resizing width is appended, which is calculated from `<width>`, `<height>`, and the dimension of the target screen.
+- `<sha1>` is used as the checksum and `<size>` is compared against `MAXSIZEINMIB=128` while downloading an original picture.
+- `<sha1>` is also used to mark blacklisted pictures. While downloading a resized picture, there is no checksum like `<sha1>` for an original one, but since the target filetype is always JPEG, its end-of-image marker `ffd9` is used for validation.
+- Pictures with unsuitalbe `(<width>, <height>)`, excluded `<cat>`, and blacklisted `<sha1>` are filtered out while shortlisting, where `3/4*a<=<width>/<height><=4/3*a` with `a` being the aspect ratio of the target screen.
+
+Sometimes, a picture may be renamed remotely. In the related piece of data, `<title>` is changed, but `<sha1>` remains the same. In such a case, `<pad>` is observed to be changed, too, which indicates `<pad>` being some checksum of `<title>`. The renewing strategy of WikiCommons is observed that, in a limited period of time, links restored from old `<title>` and `<pad>` are redirected to the new ones to be kept valid. It is also observed that there are many duplicated, redirected, and even missing titles returned by `images`. Updating an existing database is always preferred over generating one from scratch, as the former usually takes less than ten minutes, while the latter may take over ten hours. A perfect update creates the same database as a newly generated one to the max. To achieve this, here are some key points:
+
+- Always call `imageinfo` with the parameter `redirects` to resolve redirects, so that while generating or updating, for one picture, only one piece of data with the latest `<title>` is stored and all redirects are skipped
+- While updating, for each `<title>` returned by `images`, if there exists a piece of data with the same `<title>`, reuse it to save time, but this `<title>` may be a redirect.
+- While updating, for `<title>` returned by `images` with no exiting data matched, after resolved by `imageinfo`, if there is an existing piece of data with the same `<sha1>`, replace it. This fixes the issue raised in the last point to the max.
+
+In fact, by following the above points, a database updated from a nearly two-year-old one is perfectly identical to a newly generated one, which indicates that a picture getting replaced but not renamed is very rare, and ensures that `<sha1>` is the better identifier for a blacklisted picture than `<title>`.

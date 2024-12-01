@@ -50,7 +50,7 @@ class WallPaper:
         self.data = data
 
     def cache(self, tag, dir):
-        # downloads a resized .jpg and checks its eio
+        # downloads a resized .jpg and checks its eoi
         if not isdir(dir):
             mkdir(dir)
         url = (
@@ -74,8 +74,8 @@ class WallPaper:
         if type(response) != str:
             with open(filepath, mode="rb") as file:
                 file.seek(-2, 2)
-                eio = file.read()
-            if eio == bytes.fromhex("ffd9"):
+                eoi = file.read()
+            if eoi == bytes.fromhex("ffd9"):
                 size = int(response.headers["content-length"])
                 return (size, filename)
             fnc.remove(filepath)
