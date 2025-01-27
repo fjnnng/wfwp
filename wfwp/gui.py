@@ -69,8 +69,10 @@ class QMediaPlayer(MediaPlayer):
     def callback(self, future, source, *args):
         result = self.getresult(future, source, *args)
         if source == "oops":
-            oopsbox()
-            self.tray.oops()
+            if not self.tray.release():
+                oopsbox()
+                self.tray.quitapp()
+            return
         if source == "stats":
             statsbox(self)
             return
@@ -181,7 +183,10 @@ class Tray:
         self.blacklistmenu = self.menu.addMenu("Blacklist...")
         self.blacklist = QAction("Blacklist and Switch")
         self.clearblacklist = QAction("Clear the Blacklist")
-        self.blacklistmenu.addActions([self.blacklist, self.clearblacklist])
+        self.report = QAction("Report NSFW Pictures")
+        self.blacklistmenu.addActions(
+            [self.blacklist, self.clearblacklist, self.report]
+        )
         self.manualmenu = self.menu.addMenu("Manual...")
         self.cachetext = "Cache Manually (?)"
         self.statstext = "Show Stats (?)"
@@ -202,31 +207,35 @@ class Tray:
             self.blacklist,
             self.switchback,
             self.clearblacklist,
+            self.report,
         ]
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.delayer = QTimer()
         self.delayer.setSingleShot(True)
         self.delayer.setInterval(1000)
-        self.checker = fnc.ThreadPoolExecutor(1)
+        self.updater = fnc.ThreadPoolExecutor(1)
         self.future = None
         self.latest = ""
         self.url = ""
         self.tray.messageClicked.connect(self.openurl)
         self.player = player
+        self.released = False
 
     def release(self):
-        self.player.release()
-        self.checker.shutdown()
-        if self.verstamp:
-            fnc.info("[tray] eventloop quit")
+        released = self.released
+        if not self.released:
+            self.tray.hide()
+            self.player.release()
+            self.updater.shutdown()
+            self.released = True
+        return released
 
-    def oops(self):
-        if self.verstamp:
-            self.app.quit()
-        else:
-            self.release()
+    def quitapp(self):
+        if not self.verstamp:
             exit()
+        fnc.info("[tray] quit eventloop")
+        self.app.quit()
 
     def settray(self):
         self.verstamp = (
@@ -240,11 +249,12 @@ class Tray:
         self.original.triggered.connect(warpinfo(self.player.original))
         self.blacklist.triggered.connect(warpinfo(self.player.blacklist))
         self.clearblacklist.triggered.connect(warpinfo(self.player.clearblacklist))
+        self.report.triggered.connect(warpinfo(self.openurl, "", fnc.URL + "/issues"))
         self.cache.triggered.connect(warpinfo(self.player.cache))
         self.stats.triggered.connect(warpinfo(self.player.stats))
         self.about.triggered.connect(warpinfo(self.openurl, "", fnc.URL))
         self.configure.triggered.connect(warpinfo(self.player.configure))
-        self.quit.triggered.connect(warpinfo(self.app.quit))
+        self.quit.triggered.connect(warpinfo(self.quitapp, "quit clicked"))
         self.update.triggered.connect(
             warpinfo(self.openurl, "", fnc.URL + "/releases/latest")
         )
@@ -328,7 +338,7 @@ class Tray:
             self.menu.addActions([self.update])
         actions = []
         if fnc.skipnone(self.player.medialibrary.present):
-            actions.extend([self.details, self.original, self.blacklist])
+            actions.extend([self.details, self.original, self.blacklist, self.report])
         if fnc.skipnone(self.player.medialibrary.history):
             actions.append(self.switchback)
         if fnc.loadblacklist():
@@ -350,7 +360,7 @@ class Tray:
                 and not self.latest
                 and (not self.future or self.future.done())
             ):
-                self.future = self.checker.submit(self.checklatest)
+                self.future = self.updater.submit(self.checklatest)
 
     def refreshtip(self, tooltip="wfwp"):
         self.tray.setToolTip(tooltip)

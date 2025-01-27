@@ -177,6 +177,7 @@ class PlayTable:
         if suppressportrait:
             excludedcat ^= 4
         excludedsha1s = fnc.loadblacklist()
+        excludedsha1s.extend(fnc.NSFWS)
         datas = []
         for data in database.datas:
             if not data.cat & excludedcat and data.sha1 not in excludedsha1s:

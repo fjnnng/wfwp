@@ -70,6 +70,12 @@ Intervalinmin = 0
 Proxy = ""
 Excludedcats = DEFAULTCATS
 
+# hardcoded nsfw blacklist
+NSFWS = (
+    "321dc7572a6c040981276bfa7477457f86882d53",  # https://commons.wikimedia.org/wiki/File:Famille_d%E2%80%99un_Chef_Camacan_se_pr%C3%A9parant_pour_une_F%C3%AAte.jpg
+    "9bf9caaa239ebdc5fe476536efbfdf1df8ef384b",  # https://commons.wikimedia.org/wiki/File:20120303_zoophilia_Lakshmana_Temple_Khajuraho_India_(panoramic_version).jpg
+)
+
 
 def getcat(usages):
     # categories selected from https://commons.wikimedia.org/wiki/Commons:Featured_pictures

@@ -14,13 +14,14 @@ Download an executable from the "Releases" page and run it. If you encounter a m
 
 - If there are multiple screens and you click "Switch", wfwp will ask you to choose one, with a special "All" option provided. ***Double-clicking the tray icon is a shortcut to "Switch" -> "All".***
 - But if there is only one monitor to "Switch", or only one monitor whose wallpaper was recently set by wfwp to "Switch Back", wfwp will not ask for confirmation. Further, if there is no such monitor, the corresponding buttons will be disabled. The same principle applies to the "Details", "Original", and "Blacklist" buttons.
-- If an interval of time is set in "Configure" -> "Switch", wfwp will automatically cache and switch wallpapers for all monitors, and any monitor whose wallpaper was not set by wfwp will be switched immediately. Otherwise, actions need to be done manually, and to avoid waiting after each click of "Switch", try "Manual..." -> "Cache Manually" in advance.
+- If an interval of time is set in "Configure" -> "Switch", wfwp will afutomatically cache and switch wallpapers for all monitors, and any monitor whose wallpaper was not set by wfwp will be switched immediately. Otherwise, actions need to be done manually, and to avoid waiting after each click of "Switch", try "Manual..." -> "Cache Manually" in advance.
 - wfwp manages wallpapers automatically. For each monitor, a reasonable limit on the total size of wallpapers is set. wfwp preserves the latest wallpaper in case you want to revert to it and deletes older ones.
 - wfwp redetects monitors every time an added or removed screen signals from Qt. However, Qt is not always reliable, and wfwp is not designed to be aggressive. ***Sometimes manually redetect monitors by clicking the tray icon (with any button) may be useful.***
 - ***If the tray icon turns gray, the Internet is detected as disconnected.*** This happens as a result of a failed download attempt. Afterwards, wfwp will check the connectivity every minute, until connected or a picture downloaded successfully.
+- NSFW pictures rarely show up. Known ones are blocked by hardcoding their sha1s in `fnc.py`. You are welcome to report more via an issue as "Blacklist..." -> "Report NSFW Pictures" redirects.
 - Information shown in the "Manual" sub-menu:
   - Cache Manually (`<cached wallpapers>/<detected monitors>`)
-  - Show Stats (`<useful pictures>/<all pictures>`): `<useful pictures>` counts the pictures fit at least one monitor and are not blacklisted/excluded by sha1s/categories among `<all pictures>` in the database.
+  - Show Stats (`<useful pictures>/<all pictures>`): `<useful pictures>` counts the pictures fit at least one monitor and are not blocked as NSFW pictures or blacklisted/excluded by sha1s/categories among `<all pictures>` in the database.
   - About wfwp (`<wfwp version>-<database version>`)
 - For more useful information, see "2.4 Tips".
 
@@ -146,18 +147,18 @@ The data is collected using the `query` module of [MediaWiki API](https://common
 
 - `images` requests `title=File:<title>.<ext>` of all pictures from every half year listed at the top of [Commons:Featured pictures/chronological](https://commons.wikimedia.org/wiki/Commons:Featured_pictures/chronological).
 - `imageinfo` requests `url=https://upload.wikimedia.org/wikipedia/commons/<pad>/<title>.<ext>`, `<sha1>`, `<size>`, `<width>`, and `<height>`, of `title`, where `<pad>=h/hh`, with each `h` representing a hexadecimal digit.
-- `imageusage` requests all pages that use `title`, from which a `<cat>` can be calculated by matching selected key words from the categories listed at the bottom of [Commons:Featured_pictures](https://commons.wikimedia.org/wiki/Commons:Featured_pictures).
+- `imageusage` requests all pages that use `title`, from which a `<cat>` can be calculated by matching selected key words from the categories listed at the bottom of [Commons:Featured pictures](https://commons.wikimedia.org/wiki/Commons:Featured_pictures).
 
 The database stores all these eight bracket-enclosed values for every picture. Here are their usages:
 
 - `<pad>`, `<title>`, and `<ext>` are used to restore all URLs. While switching, a parameter specifying the target resizing width is appended, which is calculated from `<width>`, `<height>`, and the dimension of the target screen.
 - `<sha1>` is used as the checksum and `<size>` is compared against `MAXSIZEINMIB=128` while downloading an original picture.
 - `<sha1>` is also used to mark blacklisted pictures. While downloading a resized picture, there is no checksum like `<sha1>` for an original one, but since the target filetype is always JPEG, its end-of-image marker `ffd9` is used for validation.
-- Pictures with unsuitalbe `(<width>, <height>)`, excluded `<cat>`, and blacklisted `<sha1>` are filtered out while shortlisting, where `3/4*a<=<width>/<height><=4/3*a` with `a` being the aspect ratio of the target screen.
+- Pictures with unsuitalbe `(<width>, <height>)`, excluded `<cat>`, or blacklisted `<sha1>` are filtered out while shortlisting, where `3/4*a<=<width>/<height><=4/3*a` with `a` being the aspect ratio of the target screen.
 
-Sometimes, a picture may be renamed remotely. In the related piece of data, `<title>` is changed, but `<sha1>` remains the same. In such a case, `<pad>` is observed to be changed, too, which indicates `<pad>` being some checksum of `<title>`. The renewing strategy of WikiCommons is observed that, in a limited period of time, links restored from old `<title>` and `<pad>` are redirected to the new ones to be kept valid. It is also observed that there are many duplicated, redirected, and even missing titles returned by `images`. Updating an existing database is always preferred over generating one from scratch, as the former usually takes less than ten minutes, while the latter may take over ten hours. A perfect update creates the same database as a newly generated one to the max. To achieve this, here are some key points:
+Sometimes, a picture may be renamed remotely. In the related piece of data, `<title>` is changed, but `<sha1>` remains the same. In such a case, `<pad>` is observed to be changed, too, which indicates `<pad>` being some checksum of `<title>`. The renewing strategy of WikiCommons is observed that, in a limited period of time, links restored from old `<title>` and `<pad>` are redirected to the new ones to be kept valid. It is also observed that there are many duplicated, redirected, or even missing titles returned by `images`. Updating an existing database is always preferred over generating one from scratch, as the former usually takes less than ten minutes, while the latter may take over ten hours. A perfect update creates the same database as a newly generated one to the max. To achieve this, here are some key points:
 
-- Always call `imageinfo` with the parameter `redirects` to resolve redirects, so that while generating or updating, for one picture, only one piece of data with the latest `<title>` is stored and all redirects are skipped
+- Always call `imageinfo` with the parameter `redirects` to resolve redirects, so that while generating or updating, for one picture, only one piece of data with the latest `<title>` is stored and all redirects are skipped.
 - While updating, for each `<title>` returned by `images`, if there exists a piece of data with the same `<title>`, reuse it to save time, but this `<title>` may be a redirect.
 - While updating, for `<title>` returned by `images` with no exiting data matched, after resolved by `imageinfo`, if there is an existing piece of data with the same `<sha1>`, replace it. This fixes the issue raised in the last point to the max.
 

@@ -541,6 +541,10 @@ if __name__ == "__main__":
                 database.update()
                 while database.errors or database.pauses:
                     database.fix()
+                sha1s = [data.sha1 for data in database.datas]
+                for sha1 in fnc.NSFWS:
+                    if sha1 not in sha1s:
+                        print("outdated nsfw: " + sha1)
             else:
                 del database.filename
                 del database.errors
