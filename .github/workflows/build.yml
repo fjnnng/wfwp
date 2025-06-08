@@ -1,0 +1,35 @@
+on:
+  release:
+      types:
+        - prereleased
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: pip install comtypes pyside6 requests[socks] tqdm
+      - run: python wfwp/cli.py --generatepickle
+      - uses: Nuitka/Nuitka-Action@main
+        with:
+          enable-plugins: pyside6
+          include-data-files: |
+            data/database.pickle=data/database.pickle
+            data/icon.ico=data/icon.ico
+          mode: onefile
+          msvc: latest
+          output-dir: .
+          output-file: wfwp.exe
+          script-name: wfwp/gui.py
+          windows-console-mode: disable
+          windows-icon-from-ico: data/icon.ico
+      - run: pip freeze > requirements.win.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            requirements.win.txt
+            wfwp.exe
