@@ -1,7 +1,8 @@
 "function"
-# 1/6, gathers modules, variables, and functions used by more than one file
 
-# non-oneshot modules and those used by this file are gathered here
+# 1/6, gathers modules, variables, and functions
+
+# standard modules
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import file_digest
 from json import dump, load
@@ -12,25 +13,23 @@ from os.path import abspath, dirname, join, isfile
 from random import choice
 from sys import exception
 
-# third-party ones
+# non-standard ones
 from requests import get
 from tqdm import tqdm
 
-# non-local variables are gathered here
-VERSION = "v0.1"
+# settings
 CHECKLATEST = True
+VERSION = "v0.1.1"
 
-# those never change
+# constants
 MAXSIZEINMIB = 128
 URL = "https://github.com/fjnnng/wfwp"
 CACHEDIR = "cache"
 DOWNLOADDIR = "download"
-BLACKLIST = "blacklist.json"
 CONFIGURATION = "configuration.json"
 DATABASE = "database.pickle"
 ICON = "icon.ico"
 LOG = "logging.log"
-EXTS = (".jpg", ".jpeg", ".png", ".tif", ".tiff")
 CATS = [
     "arthropod",
     "bird",
@@ -59,26 +58,27 @@ DEFAULTCATS = [
     "reptile",
     "rock",
 ]
+EXTS = (".jpg", ".jpeg", ".png", ".tif", ".tiff")
+NSFWS = [
+    "321dc7572a6c040981276bfa7477457f86882d53",  # https://commons.wikimedia.org/wiki/File:Famille_d%E2%80%99un_Chef_Camacan_se_pr%C3%A9parant_pour_une_F%C3%AAte.jpg
+    "9bf9caaa239ebdc5fe476536efbfdf1df8ef384b",  # https://commons.wikimedia.org/wiki/File:20120303_zoophilia_Lakshmana_Temple_Khajuraho_India_(panoramic_version).jpg
+]
 
-# used by the codes
+# states
 PROBAR = True
-PLATFORM = ""
 DATADIR = "data"
+PLATFORM = ""
 
-# settings overwritten by configuration.json
+# configurations
 Intervalinmin = 0
 Proxy = ""
 Excludedcats = DEFAULTCATS
-
-# hardcoded nsfw blacklist
-NSFWS = (
-    "321dc7572a6c040981276bfa7477457f86882d53",  # https://commons.wikimedia.org/wiki/File:Famille_d%E2%80%99un_Chef_Camacan_se_pr%C3%A9parant_pour_une_F%C3%AAte.jpg
-    "9bf9caaa239ebdc5fe476536efbfdf1df8ef384b",  # https://commons.wikimedia.org/wiki/File:20120303_zoophilia_Lakshmana_Temple_Khajuraho_India_(panoramic_version).jpg
-)
+Blacklist = []
+Configuration = {}
 
 
 def getcat(usages):
-    # categories selected from https://commons.wikimedia.org/wiki/Commons:Featured_pictures
+    # categories are selected from https://commons.wikimedia.org/wiki/Commons:Featured_pictures
     cat = 0
     for usage in usages:
         usage = usage.lower()
@@ -120,7 +120,7 @@ def getcat(usages):
 
 
 def getresponse(url, filepath="", probar=bool("__compiled__" in globals())):
-    # returns a requests.models.Response or an exception name
+    # returns a requests.models.Response or an exception's name
     proxies = None
     if Proxy:
         proxies = {"http": Proxy, "https": Proxy}
@@ -128,9 +128,9 @@ def getresponse(url, filepath="", probar=bool("__compiled__" in globals())):
         response = get(
             url,
             proxies=proxies,
+            stream=bool(filepath),
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=10,
-            stream=bool(filepath),
         )
         if filepath:
             iterator = response.iter_content(1024)
@@ -146,62 +146,69 @@ def getresponse(url, filepath="", probar=bool("__compiled__" in globals())):
                 for chunk in iterator:
                     file.write(chunk)
     except:
-        response = type(exception()).__name__
         if filepath and isfile(filepath):
             remove(filepath)
+        return type(exception()).__name__
     return response
 
 
-def loadblacklist(filename=BLACKLIST):
-    # removes apparently invalid blacklist.json only
-    blacklist = []
-    if isfile(filename):
-        with open(filename, encoding="utf-8") as file:
-            blacklist = load(file)
-        if type(blacklist) != list or not blacklist:
-            remove(filename)
-            blacklist = []
-    return blacklist
-
-
 def loadconfiguration(filename=CONFIGURATION):
-    # removes apparently invalid configuration.json only
-    global Intervalinmin, Proxy, Excludedcats
+    global Intervalinmin, Proxy, Excludedcats, Blacklist
     Intervalinmin = 0
     Proxy = ""
     Excludedcats = DEFAULTCATS
-    configuration = {}
-    if isfile(filename):
-        with open(filename, encoding="utf-8") as file:
-            configuration = load(file)
-        if type(configuration) != dict or not configuration:
-            remove(filename)
-            configuration = {}
-    if (
-        "intervalinmin" in configuration
-        and type(configuration["intervalinmin"]) == int
-        and configuration["intervalinmin"] > 0
-        and (
-            configuration["intervalinmin"] < 60
-            or (
-                configuration["intervalinmin"] <= 1440
-                and not configuration["intervalinmin"] % 60
+    Blacklist = []
+    if not isfile(filename):
+        return
+    with open(filename, encoding="utf-8") as file:
+        configuration = load(file)
+    if type(configuration) != dict:
+        return
+    if "intervalinmin" in configuration:
+        intervalinmin = configuration["intervalinmin"]
+        if (
+            type(intervalinmin) == int
+            and intervalinmin > 0
+            and (
+                intervalinmin < 60 or (intervalinmin <= 1440 and not intervalinmin % 60)
             )
-        )
-    ):
-        Intervalinmin = configuration["intervalinmin"]
-    if (
-        "proxy" in configuration
-        and type(configuration["proxy"]) == str
-        and configuration["proxy"].startswith(("http://", "socks5://", "socks5h://"))
-    ):
-        Proxy = configuration["proxy"]
-    if "excludedcats" in configuration and type(configuration["excludedcats"]) == list:
-        excludedcats = []
-        for excludedcat in configuration["excludedcats"]:
-            if type(excludedcat) == str and excludedcat in CATS:
-                excludedcats.append(excludedcat)
-        Excludedcats = excludedcats
+        ):
+            Intervalinmin = intervalinmin
+    if "proxy" in configuration:
+        proxy = configuration["proxy"]
+        if type(proxy) == str and proxy.startswith(
+            ("http://", "socks5://", "socks5h://")
+        ):
+            Proxy = proxy
+    if "excludedcats" in configuration:
+        excludedcats = configuration["excludedcats"]
+        if type(excludedcats) == list:
+            Excludedcats = []
+            for excludedcat in excludedcats:
+                if type(excludedcat) == str and excludedcat in CATS:
+                    Excludedcats.append(excludedcat)
+    if "blacklist" in configuration:
+        blacklist = configuration["blacklist"]
+        if type(blacklist) == list and blacklist:
+            Blacklist = blacklist
+
+
+def dumpconfiguration(filename=CONFIGURATION):
+    global Configuration
+    Configuration = {}
+    if Intervalinmin:
+        Configuration["intervalinmin"] = Intervalinmin
+    if Proxy:
+        Configuration["proxy"] = Proxy
+    if set(Excludedcats) != set(DEFAULTCATS):
+        Configuration["excludedcats"] = Excludedcats
+    if Blacklist:
+        Configuration["blacklist"] = Blacklist
+    if Configuration:
+        with open(filename, mode="w", encoding="utf-8") as file:
+            dump(Configuration, file)
+    elif isfile(filename):
+        remove(filename)
 
 
 def skipnone(list):

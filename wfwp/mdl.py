@@ -1,4 +1,5 @@
 "medialibrary"
+
 # 3/6, low-level classes for the cli/gui to manage datas from the database and caches from the directory
 
 import fnc
@@ -176,8 +177,7 @@ class PlayTable:
         suppressportrait = bool(excludedcat & 4)
         if suppressportrait:
             excludedcat ^= 4
-        excludedsha1s = fnc.loadblacklist()
-        excludedsha1s.extend(fnc.NSFWS)
+        excludedsha1s = fnc.Blacklist + fnc.NSFWS
         datas = []
         for data in database.datas:
             if not data.cat & excludedcat and data.sha1 not in excludedsha1s:

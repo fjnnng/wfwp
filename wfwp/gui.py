@@ -1,4 +1,5 @@
 "graphical user interface"
+
 # 6/6, adds gui features based on qt
 
 import fnc
@@ -341,7 +342,7 @@ class Tray:
             actions.extend([self.details, self.original, self.blacklist, self.report])
         if fnc.skipnone(self.player.medialibrary.history):
             actions.append(self.switchback)
-        if fnc.loadblacklist():
+        if fnc.Blacklist:
             actions.append(self.clearblacklist)
         for action in self.actions:
             if action in actions:
@@ -547,7 +548,6 @@ def selectdialog(player, indexes, attrname):
 
 
 def configuredialog(player):
-    # edits blacklist.json and does deeper check on it than loadblacklist()
     configuredialog = QDialog()
     configuredialog.setWindowTitle("Configure")
     dialoglayout = QVBoxLayout()
@@ -676,42 +676,36 @@ def configuredialog(player):
         # watches on the change of Intervalinmin
         # checks internet connectivity at once if disconnected and Proxy is changed
         # regenerates the medialibrary if Excludedcats is changed
-        configuration = {}
         if switchgroup.checkedButton() == autoradio:
             intervalinmin = autospin.value()
             if autocombo.currentIndex() == 1:
                 intervalinmin *= 60
-            configuration["intervalinmin"] = intervalinmin
+            if fnc.Intervalinmin != intervalinmin:
+                fnc.Intervalinmin = intervalinmin
+                fnc.info("[tray] interval changed")
+                if fnc.Intervalinmin:
+                    player.scheduleplay(True)
+                else:
+                    player.scheduleplay()
         if proxygroup.checkedButton() == proxyradio:
-            configuration["proxy"] = proxycombo.currentText() + proxyline.text()
+            proxy = proxycombo.currentText() + proxyline.text()
+            if fnc.Proxy != proxy:
+                fnc.Proxy = proxy
+                fnc.info("[tray] proxy changed")
+                if player.checker.disconnected:
+                    player.checker.set(None)
         excludedcats = []
         index = 0
         for catbox in catboxes:
             if catbox.isChecked():
                 excludedcats.append(fnc.CATS[index])
             index += 1
-        if excludedcats and set(excludedcats) != set(fnc.DEFAULTCATS):
-            configuration["excludedcats"] = excludedcats
-        configuredialog.accept()
-        with open(fnc.CONFIGURATION, mode="w", encoding="utf-8") as file:
-            fnc.dump(configuration, file)
-        intervalinmin = fnc.Intervalinmin
-        proxy = fnc.Proxy
-        excludedcats = fnc.Excludedcats
-        fnc.loadconfiguration()
-        if fnc.Intervalinmin != intervalinmin:
-            fnc.info("[tray] interval changed")
-            if intervalinmin:
-                player.scheduleplay(True)
-            else:
-                player.scheduleplay()
-        if fnc.Proxy != proxy:
-            fnc.info("[tray] proxy changed")
-            if player.checker.disconnected:
-                player.checker.set(None)
         if set(fnc.Excludedcats) != set(excludedcats):
+            fnc.Excludedcats = excludedcats
             fnc.info("[tray] excludedcat changed")
             player.generate()
+        fnc.dumpconfiguration()
+        configuredialog.accept()
 
     defaultbutton = QPushButton("Default")
     savebutton = QPushButton("Save")

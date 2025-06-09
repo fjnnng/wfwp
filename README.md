@@ -108,7 +108,6 @@ Executables compiled by Nuitka, including those provided on the "Releases" page,
 - Other directories and files wfwp may create are shown as the following diagram, where:
   - Original pictures downloaded via the "Download the Original" button are stored in `download/`.
   - Cached wallpapers are stored in `cache/` and cleaned automatically.
-  - Wallpapers blacklisted are noted in `blacklist.json` as a list of sha1s of their originals.
   - Configurations different from the defaults are noted in `configuration.json`.
   - `wfwp.*` indicates the executable.
   - There is also a temporary directory for unpacking, following the default behaviour of Nuitka.
@@ -126,7 +125,6 @@ cwd/
     |--cache/
     |   |--*.jpg
     |
-    |--blacklist.json
     |--configuration.json
     |--wfwp.*
 ```

@@ -1,4 +1,5 @@
 "tests how windows and macos handle added or removed screens"
+
 from logging import basicConfig, info, INFO
 from platform import platform
 from PySide6.QtCore import QTimer

@@ -1,4 +1,5 @@
 "data"
+
 # 2/6, classes for generating a database, which may be serialized into a .pickle to feed the cli/gui
 
 # home-made ones

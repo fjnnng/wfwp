@@ -1,4 +1,5 @@
 "windows"
+
 # 4/6, windows implementation of getmonitors(), getwallpaper(), and setwallpaper()
 
 import fnc

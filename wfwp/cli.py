@@ -315,7 +315,7 @@ class MediaPlayer:
         return indexes
 
     def blacklist(self, indexes=None):
-        # updates the blacklist and does deeper check on blacklist.json than loadblacklist()
+        # updates the blacklist and does deeper check on blacklist than loadconfiguration()
         # tries to switch, and if failed, tries to switch back
         # regenerate self.medialibrary to apply the new blacklist
         schedule = False
@@ -325,17 +325,18 @@ class MediaPlayer:
                 schedule = True
         if not indexes:
             return None
-        blacklist = fnc.loadblacklist()
-        blacklist.append(self.medialibrary.present[indexes[0]].wallpaper.data.sha1)
+        blacklist = fnc.Blacklist + [
+            self.medialibrary.present[indexes[0]].wallpaper.data.sha1
+        ]
+        fnc.Blacklist = []
         fnc.info("[player] blacklist " + str(indexes))
         self.medialibrary.swap(indexes[0])
         blacklist = list(set(blacklist))
         sha1s = [data.sha1 for data in self.database.datas]
         for sha1 in blacklist:
-            if sha1 not in sha1s or sha1 in fnc.NSFWS:
-                blacklist.remove(sha1)
-        with open(fnc.BLACKLIST, mode="w", encoding="utf-8") as file:
-            fnc.dump(blacklist, file)
+            if sha1 in sha1s and sha1 not in fnc.NSFWS:
+                fnc.Blacklist.append(sha1)
+        fnc.dumpconfiguration()
         indexes = self.switch(indexes)
         if indexes:
             if self.medialibrary.next(None, indexes[0]):
@@ -348,8 +349,9 @@ class MediaPlayer:
         return indexes
 
     def clearblacklist(self):
-        if fnc.loadblacklist():
-            fnc.remove(fnc.BLACKLIST)
+        if fnc.Blacklist:
+            fnc.Blacklist = []
+            fnc.dumpconfiguration()
             self.generate()
 
     def details(self, indexes=None):
