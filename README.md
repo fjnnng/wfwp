@@ -1,5 +1,7 @@
 # wfwp
 
+> The code was written before I knew any reasonable thing about data structures and algorithms so it requires updated. I am on it.
+
 wfwp is a wallpaper changer with multi-screen support. It is designed to be cross-platform. Its name comes from "**W**ikimedia Commons **F**eatured Pictures as **W**all**p**apers".
 
 ![Windows](/screenshot/win.png)
